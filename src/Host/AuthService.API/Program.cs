@@ -1,11 +1,14 @@
 ﻿using System.Text;
 using AccessControl.Application;
 using AccessControl.Infrastructure;
+using AccessControl.Infrastructure.Persistence;
 using AuthService.API.Authorization;
 using AuthService.API.Extensions;
 using AuthService.API.Middleware;
+using AuthService.API.Seeding;
 using Identity.Application;
 using Identity.Infrastructure;
+using Identity.Infrastructure.Persistence;
 using Identity.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -28,6 +31,11 @@ builder.Services.AddIdentityApplication();
 builder.Services.AddIdentityInfrastructure(builder.Configuration);
 builder.Services.AddAccessControlApplication();
 builder.Services.AddAccessControlInfrastructure(builder.Configuration);
+
+// Health Checks
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<IdentityDbContext>("IdentityDb")
+    .AddDbContextCheck<AccessControlDbContext>("AccessControlDb");
 
 // JWT Bearer Authentication (MapInboundClaims = false to preserve exact claim names)
 var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
@@ -81,5 +89,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
+
+// Apply migrations and seed data
+await app.SeedDatabaseAsync();
 
 app.Run();
