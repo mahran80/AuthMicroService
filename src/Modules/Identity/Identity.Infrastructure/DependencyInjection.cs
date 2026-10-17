@@ -22,7 +22,10 @@ public static class DependencyInjection
                 ?? configuration.GetConnectionString("Database")
                 ?? "Server=(localdb)\\mssqllocaldb;Database=AuthMicroserviceDb;Trusted_Connection=True;MultipleActiveResultSets=true";
 
-            options.UseSqlServer(connectionString);
+            options.UseSqlServer(connectionString, sqlOptions =>
+            {
+                sqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", "identity");
+            });
         });
 
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
