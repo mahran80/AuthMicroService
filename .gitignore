@@ -1,0 +1,54 @@
+## Build and output directories
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio & Visual Studio Code
+.vs/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.userprefs
+
+## JetBrains Rider / Resharper
+.idea/
+*.DotSettings.user
+_ReSharper*/
+
+## Test Results & Coverage
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.visualstudio.trx
+coverage/
+*.cobertura.xml
+
+## NuGet Packages
+*.nupkg
+*.snupkg
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.assets.json
+
+## OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+
+## Local Environment & Secret overrides
+*.local.json
+appsettings.Production.json
+secrets.json
