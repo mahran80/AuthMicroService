@@ -1,0 +1,15 @@
+D:\codes\Auth Service\src\Modules\Identity\Identity.Domain\bin\Debug\net8.0\Identity.Domain.deps.json
+D:\codes\Auth Service\src\Modules\Identity\Identity.Domain\bin\Debug\net8.0\Identity.Domain.dll
+D:\codes\Auth Service\src\Modules\Identity\Identity.Domain\bin\Debug\net8.0\Identity.Domain.pdb
+D:\codes\Auth Service\src\Modules\Identity\Identity.Domain\bin\Debug\net8.0\SharedKernel.dll
+D:\codes\Auth Service\src\Modules\Identity\Identity.Domain\bin\Debug\net8.0\SharedKernel.pdb
+D:\codes\Auth Service\src\Modules\Identity\Identity.Domain\obj\Debug\net8.0\Identity.Domain.csproj.AssemblyReference.cache
+D:\codes\Auth Service\src\Modules\Identity\Identity.Domain\obj\Debug\net8.0\Identity.Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\codes\Auth Service\src\Modules\Identity\Identity.Domain\obj\Debug\net8.0\Identity.Domain.AssemblyInfoInputs.cache
+D:\codes\Auth Service\src\Modules\Identity\Identity.Domain\obj\Debug\net8.0\Identity.Domain.AssemblyInfo.cs
+D:\codes\Auth Service\src\Modules\Identity\Identity.Domain\obj\Debug\net8.0\Identity.Domain.csproj.CoreCompileInputs.cache
+D:\codes\Auth Service\src\Modules\Identity\Identity.Domain\obj\Debug\net8.0\Identity.AFA9DB19.Up2Date
+D:\codes\Auth Service\src\Modules\Identity\Identity.Domain\obj\Debug\net8.0\Identity.Domain.dll
+D:\codes\Auth Service\src\Modules\Identity\Identity.Domain\obj\Debug\net8.0\refint\Identity.Domain.dll
+D:\codes\Auth Service\src\Modules\Identity\Identity.Domain\obj\Debug\net8.0\Identity.Domain.pdb
+D:\codes\Auth Service\src\Modules\Identity\Identity.Domain\obj\Debug\net8.0\ref\Identity.Domain.dll

@@ -1,0 +1,17 @@
+D:\codes\Auth Service\src\Modules\AccessControl\AccessControl.Application\bin\Debug\net8.0\AccessControl.Application.deps.json
+D:\codes\Auth Service\src\Modules\AccessControl\AccessControl.Application\bin\Debug\net8.0\AccessControl.Application.dll
+D:\codes\Auth Service\src\Modules\AccessControl\AccessControl.Application\bin\Debug\net8.0\AccessControl.Application.pdb
+D:\codes\Auth Service\src\Modules\AccessControl\AccessControl.Application\bin\Debug\net8.0\AccessControl.Domain.dll
+D:\codes\Auth Service\src\Modules\AccessControl\AccessControl.Application\bin\Debug\net8.0\SharedKernel.dll
+D:\codes\Auth Service\src\Modules\AccessControl\AccessControl.Application\bin\Debug\net8.0\AccessControl.Domain.pdb
+D:\codes\Auth Service\src\Modules\AccessControl\AccessControl.Application\bin\Debug\net8.0\SharedKernel.pdb
+D:\codes\Auth Service\src\Modules\AccessControl\AccessControl.Application\obj\Debug\net8.0\AccessControl.Application.csproj.AssemblyReference.cache
+D:\codes\Auth Service\src\Modules\AccessControl\AccessControl.Application\obj\Debug\net8.0\AccessControl.Application.GeneratedMSBuildEditorConfig.editorconfig
+D:\codes\Auth Service\src\Modules\AccessControl\AccessControl.Application\obj\Debug\net8.0\AccessControl.Application.AssemblyInfoInputs.cache
+D:\codes\Auth Service\src\Modules\AccessControl\AccessControl.Application\obj\Debug\net8.0\AccessControl.Application.AssemblyInfo.cs
+D:\codes\Auth Service\src\Modules\AccessControl\AccessControl.Application\obj\Debug\net8.0\AccessControl.Application.csproj.CoreCompileInputs.cache
+D:\codes\Auth Service\src\Modules\AccessControl\AccessControl.Application\obj\Debug\net8.0\AccessCo.A6E3319A.Up2Date
+D:\codes\Auth Service\src\Modules\AccessControl\AccessControl.Application\obj\Debug\net8.0\AccessControl.Application.dll
+D:\codes\Auth Service\src\Modules\AccessControl\AccessControl.Application\obj\Debug\net8.0\refint\AccessControl.Application.dll
+D:\codes\Auth Service\src\Modules\AccessControl\AccessControl.Application\obj\Debug\net8.0\AccessControl.Application.pdb
+D:\codes\Auth Service\src\Modules\AccessControl\AccessControl.Application\obj\Debug\net8.0\ref\AccessControl.Application.dll

@@ -1,0 +1,12 @@
+D:\codes\Auth Service\src\Shared\SharedKernel\bin\Debug\net8.0\SharedKernel.deps.json
+D:\codes\Auth Service\src\Shared\SharedKernel\bin\Debug\net8.0\SharedKernel.dll
+D:\codes\Auth Service\src\Shared\SharedKernel\bin\Debug\net8.0\SharedKernel.pdb
+D:\codes\Auth Service\src\Shared\SharedKernel\obj\Debug\net8.0\SharedKernel.csproj.AssemblyReference.cache
+D:\codes\Auth Service\src\Shared\SharedKernel\obj\Debug\net8.0\SharedKernel.GeneratedMSBuildEditorConfig.editorconfig
+D:\codes\Auth Service\src\Shared\SharedKernel\obj\Debug\net8.0\SharedKernel.AssemblyInfoInputs.cache
+D:\codes\Auth Service\src\Shared\SharedKernel\obj\Debug\net8.0\SharedKernel.AssemblyInfo.cs
+D:\codes\Auth Service\src\Shared\SharedKernel\obj\Debug\net8.0\SharedKernel.csproj.CoreCompileInputs.cache
+D:\codes\Auth Service\src\Shared\SharedKernel\obj\Debug\net8.0\SharedKernel.dll
+D:\codes\Auth Service\src\Shared\SharedKernel\obj\Debug\net8.0\refint\SharedKernel.dll
+D:\codes\Auth Service\src\Shared\SharedKernel\obj\Debug\net8.0\SharedKernel.pdb
+D:\codes\Auth Service\src\Shared\SharedKernel\obj\Debug\net8.0\ref\SharedKernel.dll
