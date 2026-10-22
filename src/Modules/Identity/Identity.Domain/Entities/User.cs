@@ -1,4 +1,4 @@
-﻿namespace Identity.Domain.Entities;
+namespace Identity.Domain.Entities;
 
 using Identity.Domain.Enums;
 using SharedKernel.Domain;
@@ -74,6 +74,14 @@ public sealed class User : Entity
     public void Deactivate()
     {
         Status = UserStatus.Deactivated;
+        UpdatedAtUtc = DateTime.UtcNow;
+    }
+
+    public void UpdateContact(string email, string firstName, string lastName)
+    {
+        Email = email.ToLowerInvariant().Trim();
+        FirstName = firstName.Trim();
+        LastName = lastName.Trim();
         UpdatedAtUtc = DateTime.UtcNow;
     }
 

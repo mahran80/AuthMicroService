@@ -1,4 +1,4 @@
-﻿using Identity.Application.Abstractions.Ports;
+using Identity.Application.Abstractions.Ports;
 using Identity.Application.DTOs;
 using Identity.Domain.Entities;
 using Identity.Domain.Errors;
@@ -13,15 +13,18 @@ public sealed class RegisterUserCommandHandler : ICommandHandler<RegisterUserCom
     private readonly IUserRepository _userRepository;
     private readonly IPasswordHasherPort _passwordHasher;
     private readonly IRbacAccessPort _rbacAccessPort;
+    private readonly IUserProfilePort _userProfilePort;
 
     public RegisterUserCommandHandler(
         IUserRepository userRepository,
         IPasswordHasherPort passwordHasher,
-        IRbacAccessPort rbacAccessPort)
+        IRbacAccessPort rbacAccessPort,
+        IUserProfilePort userProfilePort)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _rbacAccessPort = rbacAccessPort;
+        _userProfilePort = userProfilePort;
     }
 
     public async Task<Result<RegisterUserResponse>> Handle(
@@ -53,6 +56,14 @@ public sealed class RegisterUserCommandHandler : ICommandHandler<RegisterUserCom
         {
             return Result.Failure<RegisterUserResponse>(rbacResult.Error);
         }
+
+        await _userProfilePort.CreateOrSyncProfileAsync(
+            user.Id,
+            user.Email,
+            $"{user.FirstName} {user.LastName}".Trim(),
+            null,
+            null,
+            cancellationToken);
 
         var response = new RegisterUserResponse(
             user.Id,

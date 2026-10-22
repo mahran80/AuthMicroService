@@ -13,13 +13,17 @@ using Identity.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
+using Users.Application;
+using Users.Infrastructure;
+using Users.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Controllers & JSON configuration
 builder.Services.AddControllers()
     .AddApplicationPart(typeof(Identity.Presentation.Controllers.AuthController).Assembly)
-    .AddApplicationPart(typeof(AccessControl.Presentation.Controllers.RbacController).Assembly);
+    .AddApplicationPart(typeof(AccessControl.Presentation.Controllers.RbacController).Assembly)
+    .AddApplicationPart(typeof(Users.Presentation.Controllers.UsersController).Assembly);
 
 // Swagger Documentation with JWT Bearer scheme
 builder.Services.AddCustomSwagger();
@@ -33,11 +37,14 @@ builder.Services.AddIdentityApplication();
 builder.Services.AddIdentityInfrastructure(builder.Configuration);
 builder.Services.AddAccessControlApplication();
 builder.Services.AddAccessControlInfrastructure(builder.Configuration);
+builder.Services.AddUsersApplication();
+builder.Services.AddUsersInfrastructure(builder.Configuration);
 
 // Health Checks
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<IdentityDbContext>("IdentityDb")
-    .AddDbContextCheck<AccessControlDbContext>("AccessControlDb");
+    .AddDbContextCheck<AccessControlDbContext>("AccessControlDb")
+    .AddDbContextCheck<UsersDbContext>("UsersDb");
 
 // JWT Bearer Authentication (MapInboundClaims = false to preserve exact claim names)
 var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
@@ -81,7 +88,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Auth & Access Control API v1");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Auth, Access Control & Users API v1");
     });
 }
 
