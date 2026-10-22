@@ -1,4 +1,4 @@
-﻿namespace AuthService.API.Contracts;
+namespace Identity.Presentation.Contracts;
 
 public sealed record RegisterRequest(
     string FirstName,

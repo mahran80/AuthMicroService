@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SharedKernel.Application;
 
-namespace AuthService.API.Extensions;
+namespace SharedKernel.Presentation;
 
 public static class ResultExtensions
 {

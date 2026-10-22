@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
-namespace AuthService.API.Authorization;
+namespace SharedKernel.Presentation;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
 public sealed class HasPermissionAttribute : AuthorizeAttribute

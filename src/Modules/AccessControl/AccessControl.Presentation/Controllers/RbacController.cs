@@ -1,18 +1,17 @@
-﻿using AccessControl.Application.DTOs;
+using AccessControl.Application.DTOs;
 using AccessControl.Application.Features.AssignUserRole;
 using AccessControl.Application.Features.CreateRole;
 using AccessControl.Application.Features.GetPermissions;
 using AccessControl.Application.Features.GetRoles;
 using AccessControl.Application.Features.UpdateRolePermissions;
 using AccessControl.Application.Features.UpdateUserStatus;
-using AuthService.API.Authorization;
-using AuthService.API.Contracts;
-using AuthService.API.Extensions;
+using AccessControl.Presentation.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SharedKernel.Presentation;
 
-namespace AuthService.API.Controllers;
+namespace AccessControl.Presentation.Controllers;
 
 [ApiController]
 [Route("api/v1/rbac")]

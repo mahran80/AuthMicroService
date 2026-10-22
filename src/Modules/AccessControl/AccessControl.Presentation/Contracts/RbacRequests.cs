@@ -1,4 +1,4 @@
-﻿namespace AuthService.API.Contracts;
+namespace AccessControl.Presentation.Contracts;
 
 public sealed record CreateRoleRequest(
     string Name,

@@ -1,18 +1,17 @@
-﻿using System.Security.Claims;
-using AuthService.API.Authorization;
-using AuthService.API.Contracts;
-using AuthService.API.Extensions;
+using System.Security.Claims;
 using Identity.Application.DTOs;
 using Identity.Application.Features.Login;
 using Identity.Application.Features.Refresh;
 using Identity.Application.Features.Register;
 using Identity.Application.Features.Revoke;
+using Identity.Presentation.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SharedKernel.Presentation;
 
-namespace AuthService.API.Controllers;
+namespace Identity.Presentation.Controllers;
 
 [ApiController]
 [Route("api/v1/auth")]

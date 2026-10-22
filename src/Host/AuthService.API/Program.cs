@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using AccessControl.Application;
 using AccessControl.Infrastructure;
 using AccessControl.Infrastructure.Persistence;
@@ -17,7 +17,9 @@ using Microsoft.IdentityModel.Tokens;
 var builder = WebApplication.CreateBuilder(args);
 
 // Controllers & JSON configuration
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddApplicationPart(typeof(Identity.Presentation.Controllers.AuthController).Assembly)
+    .AddApplicationPart(typeof(AccessControl.Presentation.Controllers.RbacController).Assembly);
 
 // Swagger Documentation with JWT Bearer scheme
 builder.Services.AddCustomSwagger();
