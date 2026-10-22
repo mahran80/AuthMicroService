@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace Identity.Application.Features.Register;
 
@@ -26,5 +26,11 @@ public sealed class RegisterUserValidator : AbstractValidator<RegisterUserComman
             .Matches(@"[a-z]").WithMessage("Password must contain at least one lowercase letter.")
             .Matches(@"\d").WithMessage("Password must contain at least one digit.")
             .Matches(@"[^\da-zA-Z]").WithMessage("Password must contain at least one special character.");
+
+        When(x => !string.IsNullOrWhiteSpace(x.PhoneNumber), () =>
+        {
+            RuleFor(x => x.PhoneNumber)
+                .MaximumLength(25).WithMessage("Phone number cannot exceed 25 characters.");
+        });
     }
 }

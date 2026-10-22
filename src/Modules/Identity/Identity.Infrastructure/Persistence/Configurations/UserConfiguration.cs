@@ -1,4 +1,4 @@
-﻿using Identity.Domain.Entities;
+using Identity.Domain.Entities;
 using Identity.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -33,6 +33,26 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.LastName)
             .IsRequired()
             .HasMaxLength(100);
+
+        builder.Property(u => u.CountryCode)
+            .IsRequired(false)
+            .HasMaxLength(10);
+
+        builder.Property(u => u.PhoneNumber)
+            .IsRequired(false)
+            .HasMaxLength(25);
+
+        builder.Property(u => u.IsEmailVerified)
+            .IsRequired()
+            .HasDefaultValue(false);
+
+        builder.Property(u => u.IsPhoneVerified)
+            .IsRequired()
+            .HasDefaultValue(false);
+
+        builder.HasIndex(u => new { u.CountryCode, u.PhoneNumber })
+            .HasFilter("[CountryCode] IS NOT NULL AND [PhoneNumber] IS NOT NULL")
+            .HasDatabaseName("UX_Users_Phone");
 
         builder.Property(u => u.Status)
             .HasConversion<byte>()

@@ -1,4 +1,4 @@
-﻿using Identity.Application.Abstractions.Ports;
+using Identity.Application.Abstractions.Ports;
 using Identity.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -66,5 +66,61 @@ public sealed class UserRepository : IUserRepository
     public async Task SaveChangesAsync(CancellationToken ct = default)
     {
         await _context.SaveChangesAsync(ct);
+    }
+
+    public async Task<User?> GetByPhoneAsync(string countryCode, string phoneNumber, CancellationToken ct = default)
+    {
+        return await _context.Users
+            .Include(u => u.RefreshTokens)
+            .FirstOrDefaultAsync(u => u.CountryCode == countryCode && u.PhoneNumber == phoneNumber, ct);
+    }
+
+    public async Task<bool> ExistsByPhoneAsync(string countryCode, string phoneNumber, CancellationToken ct = default)
+    {
+        return await _context.Users
+            .AnyAsync(u => u.CountryCode == countryCode && u.PhoneNumber == phoneNumber, ct);
+    }
+
+    public async Task AddOtpVerificationAsync(OtpVerification otp, CancellationToken ct = default)
+    {
+        await _context.OtpVerifications.AddAsync(otp, ct);
+    }
+
+    public async Task<OtpVerification?> GetLatestActiveOtpAsync(Guid userId, Identity.Domain.Enums.OtpPurpose purpose, CancellationToken ct = default)
+    {
+        var now = DateTime.UtcNow;
+        return await _context.OtpVerifications
+            .Where(o => o.UserId == userId && o.Purpose == purpose && o.UsedAtUtc == null && o.ExpiresAtUtc > now && o.FailedAttempts < 5)
+            .OrderByDescending(o => o.CreatedAtUtc)
+            .FirstOrDefaultAsync(ct);
+    }
+
+    public async Task AddPasswordResetTokenAsync(PasswordResetToken token, CancellationToken ct = default)
+    {
+        await _context.PasswordResetTokens.AddAsync(token, ct);
+    }
+
+    public async Task<PasswordResetToken?> GetActivePasswordResetTokenByHashAsync(string tokenHash, CancellationToken ct = default)
+    {
+        var now = DateTime.UtcNow;
+        return await _context.PasswordResetTokens
+            .FirstOrDefaultAsync(p => p.TokenHash == tokenHash && p.UsedAtUtc == null && p.ExpiresAtUtc > now, ct);
+    }
+
+    public async Task AddLoginSessionAsync(LoginSession session, CancellationToken ct = default)
+    {
+        await _context.LoginSessions.AddAsync(session, ct);
+    }
+
+    public async Task TerminateLoginSessionByRefreshTokenAsync(Guid refreshTokenId, CancellationToken ct = default)
+    {
+        var sessions = await _context.LoginSessions
+            .Where(s => s.RefreshTokenId == refreshTokenId && s.IsActive)
+            .ToListAsync(ct);
+
+        foreach (var session in sessions)
+        {
+            session.TerminateSession();
+        }
     }
 }

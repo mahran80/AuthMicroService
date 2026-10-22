@@ -1,4 +1,4 @@
-﻿namespace Identity.Domain.Errors;
+namespace Identity.Domain.Errors;
 
 using SharedKernel.Application;
 
@@ -23,4 +23,24 @@ public static class IdentityErrors
     public static readonly Error UserNotFound = Error.NotFound(
         "Identity.UserNotFound",
         "The requested user was not found.");
+
+    public static readonly Error PhoneAlreadyInUse = Error.Conflict(
+        "Identity.PhoneAlreadyInUse",
+        "The specified phone number is already in use.");
+
+    public static readonly Error PhoneNotFound = Error.NotFound(
+        "Identity.PhoneNotFound",
+        "No account was found with the specified phone number.");
+
+    public static readonly Error InvalidOrExpiredOtp = Error.Validation(
+        "Identity.InvalidOrExpiredOtp",
+        "The verification code is invalid, expired, or has exceeded maximum attempts.");
+
+    public static readonly Error InvalidOrExpiredResetToken = Error.Validation(
+        "Identity.InvalidOrExpiredResetToken",
+        "The password reset token is invalid or has expired.");
+
+    public static readonly Error NotificationDeliveryFailed = Error.Failure(
+        "Identity.NotificationDeliveryFailed",
+        "Failed to deliver notification message. Please try again later.");
 }

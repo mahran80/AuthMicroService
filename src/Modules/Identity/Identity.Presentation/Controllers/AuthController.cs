@@ -1,9 +1,14 @@
 using System.Security.Claims;
 using Identity.Application.DTOs;
+using Identity.Application.Features.ForgotPassword;
 using Identity.Application.Features.Login;
+using Identity.Application.Features.LoginMobile;
 using Identity.Application.Features.Refresh;
 using Identity.Application.Features.Register;
+using Identity.Application.Features.ResendOtp;
+using Identity.Application.Features.ResetPassword;
 using Identity.Application.Features.Revoke;
+using Identity.Application.Features.VerifyOtp;
 using Identity.Presentation.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -37,7 +42,9 @@ public sealed class AuthController : ControllerBase
             request.FirstName,
             request.LastName,
             request.Email,
-            request.Password);
+            request.Password,
+            request.CountryCode,
+            request.PhoneNumber);
 
         var result = await _sender.Send(command, cancellationToken);
 
@@ -68,6 +75,123 @@ public sealed class AuthController : ControllerBase
         }
 
         return Ok(result.Value);
+    }
+
+    [HttpPost("login/mobile")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(OtpDispatchedResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> LoginMobile(
+        [FromBody] LoginMobileRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = new LoginMobileCommand(request.CountryCode, request.PhoneNumber);
+
+        var result = await _sender.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return result.ToProblemDetails(HttpContext);
+        }
+
+        return Ok(result.Value);
+    }
+
+    [HttpPost("verify-otp")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(AuthTokenResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> VerifyOtp(
+        [FromBody] VerifyOtpRequest request,
+        CancellationToken cancellationToken)
+    {
+        string? ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+        string? userAgent = HttpContext.Request.Headers.UserAgent.ToString();
+
+        var command = new VerifyOtpCommand(
+            request.Email,
+            request.CountryCode,
+            request.PhoneNumber,
+            request.Code,
+            request.Purpose,
+            request.DeviceName,
+            request.DeviceType,
+            ipAddress,
+            userAgent);
+
+        var result = await _sender.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return result.ToProblemDetails(HttpContext);
+        }
+
+        return Ok(result.Value);
+    }
+
+    [HttpPost("resend-otp")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(OtpDispatchedResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ResendOtp(
+        [FromBody] ResendOtpRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = new ResendOtpCommand(
+            request.Email,
+            request.CountryCode,
+            request.PhoneNumber,
+            request.Purpose);
+
+        var result = await _sender.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return result.ToProblemDetails(HttpContext);
+        }
+
+        return Ok(result.Value);
+    }
+
+    [HttpPost("forgot-password")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(PasswordResetDispatchedResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ForgotPassword(
+        [FromBody] ForgotPasswordRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = new ForgotPasswordCommand(request.Email);
+
+        var result = await _sender.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return result.ToProblemDetails(HttpContext);
+        }
+
+        return Ok(result.Value);
+    }
+
+    [HttpPost("reset-password")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ResetPassword(
+        [FromBody] ResetPasswordRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = new ResetPasswordCommand(request.Token, request.NewPassword);
+
+        var result = await _sender.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return result.ToProblemDetails(HttpContext);
+        }
+
+        return Ok(new { message = "Password has been successfully reset." });
     }
 
     [HttpPost("refresh")]

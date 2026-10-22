@@ -11,6 +11,10 @@ public sealed class User : Entity
     public string PasswordHash { get; private set; }
     public string FirstName { get; private set; }
     public string LastName { get; private set; }
+    public string? CountryCode { get; private set; }
+    public string? PhoneNumber { get; private set; }
+    public bool IsEmailVerified { get; private set; }
+    public bool IsPhoneVerified { get; private set; }
     public UserStatus Status { get; private set; }
     public DateTime CreatedAtUtc { get; private init; }
     public DateTime? UpdatedAtUtc { get; private set; }
@@ -47,16 +51,53 @@ public sealed class User : Entity
         string email,
         string passwordHash,
         string firstName,
-        string lastName)
+        string lastName,
+        string? countryCode = null,
+        string? phoneNumber = null,
+        bool isEmailVerified = false)
     {
-        return new User(
+        var user = new User(
             Guid.NewGuid(),
             email.ToLowerInvariant().Trim(),
             passwordHash,
             firstName.Trim(),
             lastName.Trim(),
             UserStatus.Active,
-            DateTime.UtcNow);
+            DateTime.UtcNow)
+        {
+            CountryCode = string.IsNullOrWhiteSpace(countryCode) ? null : countryCode.Trim(),
+            PhoneNumber = string.IsNullOrWhiteSpace(phoneNumber) ? null : phoneNumber.Trim(),
+            IsEmailVerified = isEmailVerified,
+            IsPhoneVerified = false
+        };
+
+        return user;
+    }
+
+    public void SetPhone(string? countryCode, string? phoneNumber)
+    {
+        CountryCode = string.IsNullOrWhiteSpace(countryCode) ? null : countryCode.Trim();
+        PhoneNumber = string.IsNullOrWhiteSpace(phoneNumber) ? null : phoneNumber.Trim();
+        IsPhoneVerified = false;
+        UpdatedAtUtc = DateTime.UtcNow;
+    }
+
+    public void VerifyEmail()
+    {
+        IsEmailVerified = true;
+        UpdatedAtUtc = DateTime.UtcNow;
+    }
+
+    public void VerifyPhone()
+    {
+        IsPhoneVerified = true;
+        UpdatedAtUtc = DateTime.UtcNow;
+    }
+
+    public void UpdatePasswordHash(string newPasswordHash)
+    {
+        PasswordHash = newPasswordHash;
+        UpdatedAtUtc = DateTime.UtcNow;
     }
 
     public void Suspend()
@@ -77,11 +118,21 @@ public sealed class User : Entity
         UpdatedAtUtc = DateTime.UtcNow;
     }
 
-    public void UpdateContact(string email, string firstName, string lastName)
+    public void UpdateContact(
+        string email,
+        string firstName,
+        string lastName,
+        string? countryCode = null,
+        string? phoneNumber = null)
     {
         Email = email.ToLowerInvariant().Trim();
         FirstName = firstName.Trim();
         LastName = lastName.Trim();
+        if (countryCode != null || phoneNumber != null)
+        {
+            CountryCode = string.IsNullOrWhiteSpace(countryCode) ? null : countryCode.Trim();
+            PhoneNumber = string.IsNullOrWhiteSpace(phoneNumber) ? null : phoneNumber.Trim();
+        }
         UpdatedAtUtc = DateTime.UtcNow;
     }
 
