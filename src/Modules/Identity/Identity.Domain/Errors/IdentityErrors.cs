@@ -43,4 +43,20 @@ public static class IdentityErrors
     public static readonly Error NotificationDeliveryFailed = Error.Failure(
         "Identity.NotificationDeliveryFailed",
         "Failed to deliver notification message. Please try again later.");
+
+    public static Error UnsupportedSocialProvider(string provider) => Error.Validation(
+        "Identity.UnsupportedSocialProvider",
+        $"The social authentication provider '{provider}' is not supported.");
+
+    public static Error SocialProviderNotConfigured(string provider) => Error.Failure(
+        "Identity.SocialProviderNotConfigured",
+        $"The social authentication provider '{provider}' is not configured on the server.");
+
+    public static Error InvalidSocialCredential(string provider) => Error.Unauthorized(
+        "Identity.InvalidSocialCredential",
+        $"The provided {provider} credentials or authorization code is invalid.");
+
+    public static Error SocialEmailRequired(string provider) => Error.Validation(
+        "Identity.SocialEmailRequired",
+        $"The {provider} account did not provide a verified email address.");
 }

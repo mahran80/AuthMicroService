@@ -15,6 +15,7 @@ public class IdentityDbContext : DbContext
     public DbSet<OtpVerification> OtpVerifications => Set<OtpVerification>();
     public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
     public DbSet<LoginSession> LoginSessions => Set<LoginSession>();
+    public DbSet<ExternalLogin> ExternalLogins => Set<ExternalLogin>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

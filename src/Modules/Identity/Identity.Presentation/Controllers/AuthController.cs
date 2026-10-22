@@ -8,6 +8,7 @@ using Identity.Application.Features.Register;
 using Identity.Application.Features.ResendOtp;
 using Identity.Application.Features.ResetPassword;
 using Identity.Application.Features.Revoke;
+using Identity.Application.Features.SocialLogin;
 using Identity.Application.Features.VerifyOtp;
 using Identity.Presentation.Contracts;
 using MediatR;
@@ -66,6 +67,27 @@ public sealed class AuthController : ControllerBase
         CancellationToken cancellationToken)
     {
         var command = new LoginCommand(request.Email, request.Password);
+
+        var result = await _sender.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return result.ToProblemDetails(HttpContext);
+        }
+
+        return Ok(result.Value);
+    }
+
+    [HttpPost("social-login")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(AuthTokenResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> SocialLogin(
+        [FromBody] SocialLoginRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = new SocialLoginCommand(request.Provider, request.Credential);
 
         var result = await _sender.Send(command, cancellationToken);
 

@@ -22,4 +22,8 @@ public interface IUserRepository
     Task<PasswordResetToken?> GetActivePasswordResetTokenByHashAsync(string tokenHash, CancellationToken ct = default);
     Task AddLoginSessionAsync(LoginSession session, CancellationToken ct = default);
     Task TerminateLoginSessionByRefreshTokenAsync(Guid refreshTokenId, CancellationToken ct = default);
+
+    Task<User?> GetByExternalLoginAsync(string provider, string providerKey, CancellationToken ct = default);
+    Task<bool> ExternalLoginExistsAsync(Guid userId, string provider, CancellationToken ct = default);
+    Task AddExternalLoginAsync(ExternalLogin externalLogin, CancellationToken ct = default);
 }

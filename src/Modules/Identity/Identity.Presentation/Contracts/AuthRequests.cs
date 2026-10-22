@@ -43,3 +43,7 @@ public sealed record ForgotPasswordRequest(
 public sealed record ResetPasswordRequest(
     string Token,
     string NewPassword);
+
+public sealed record SocialLoginRequest(
+    string Provider,
+    string Credential);

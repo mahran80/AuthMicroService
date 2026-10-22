@@ -4,6 +4,7 @@ using Identity.Infrastructure.Notifications;
 using Identity.Infrastructure.Persistence;
 using Identity.Infrastructure.Persistence.Repositories;
 using Identity.Infrastructure.Security;
+using Identity.Infrastructure.Social;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,6 +33,7 @@ public static class DependencyInjection
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.Configure<UltraMsgOptions>(configuration.GetSection(UltraMsgOptions.SectionName));
         services.Configure<SmtpOptions>(configuration.GetSection(SmtpOptions.SectionName));
+        services.Configure<SocialAuthOptions>(configuration.GetSection(SocialAuthOptions.SectionName));
 
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddSingleton<IPasswordHasherPort, BcryptPasswordHasherAdapter>();
@@ -41,6 +43,17 @@ public static class DependencyInjection
 
         services.AddHttpClient<IWhatsAppNotificationPort, UltraMsgWhatsAppAdapter>();
         services.AddScoped<IEmailNotificationPort, SmtpEmailAdapter>();
+
+        services.AddHttpClient<FacebookAuthAdapter>();
+        services.AddHttpClient<GitHubAuthAdapter>();
+        services.AddHttpClient<LinkedInAuthAdapter>();
+        services.AddHttpClient<MicrosoftAuthAdapter>();
+
+        services.AddScoped<ISocialAuthProviderPort, GoogleAuthAdapter>();
+        services.AddScoped<ISocialAuthProviderPort>(sp => sp.GetRequiredService<FacebookAuthAdapter>());
+        services.AddScoped<ISocialAuthProviderPort>(sp => sp.GetRequiredService<GitHubAuthAdapter>());
+        services.AddScoped<ISocialAuthProviderPort>(sp => sp.GetRequiredService<LinkedInAuthAdapter>());
+        services.AddScoped<ISocialAuthProviderPort>(sp => sp.GetRequiredService<MicrosoftAuthAdapter>());
 
         return services;
     }

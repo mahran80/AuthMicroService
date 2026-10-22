@@ -123,4 +123,30 @@ public sealed class UserRepository : IUserRepository
             session.TerminateSession();
         }
     }
+
+    public async Task<User?> GetByExternalLoginAsync(string provider, string providerKey, CancellationToken ct = default)
+    {
+        var externalLogin = await _context.ExternalLogins
+            .FirstOrDefaultAsync(e => e.Provider == provider && e.ProviderKey == providerKey, ct);
+
+        if (externalLogin is null)
+        {
+            return null;
+        }
+
+        return await _context.Users
+            .Include(u => u.RefreshTokens)
+            .FirstOrDefaultAsync(u => u.Id == externalLogin.UserId, ct);
+    }
+
+    public async Task<bool> ExternalLoginExistsAsync(Guid userId, string provider, CancellationToken ct = default)
+    {
+        return await _context.ExternalLogins
+            .AnyAsync(e => e.UserId == userId && e.Provider == provider, ct);
+    }
+
+    public async Task AddExternalLoginAsync(ExternalLogin externalLogin, CancellationToken ct = default)
+    {
+        await _context.ExternalLogins.AddAsync(externalLogin, ct);
+    }
 }
