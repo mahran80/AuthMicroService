@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+option csharp_namespace = "Auth.Grpc";
+
+package auth;
+
+
+service AuthService
+{
+    rpc GetUserAuthInfo(GetUserAuthInfoRequest)
+        returns (GetUserAuthInfoResponse);
+        rpc DeleteAuthentication(DeleteAuthenticationRequest)
+    returns (DeleteAuthenticationReply);
+}
+
+
+message GetUserAuthInfoRequest
+{
+    string user_id = 1;
+}
+
+
+message GetUserAuthInfoResponse
+{
+    bool success = 1;
+
+    string user_id = 2;
+
+    string name = 3;
+
+    string email = 4;
+
+    string country_code = 5;
+
+    string phone_number = 6;
+}
+message DeleteAuthenticationRequest {
+    string user_id = 1;
+}
+
+message DeleteAuthenticationReply {
+    bool success = 1;
+    string message = 2;
+}

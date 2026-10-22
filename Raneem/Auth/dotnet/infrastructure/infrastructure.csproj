@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+      <PackageReference Include="Grpc.Net.ClientFactory" Version="2.71.0" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.71.0" />
+<PackageReference Include="Grpc.Tools" Version="2.71.0">
+    <PrivateAssets>all</PrivateAssets>
+</PackageReference>
+<PackageReference Include="Google.Protobuf" Version="3.31.1" />
+    <!-- <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" /> -->
+    <PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
+    <PackageReference Include="MailKit" Version="4.17.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.10" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.10" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.19.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- <ProjectReference Include="....\Whatsapp\Application\application.csproj" />
+     <ProjectReference Include="....\Whatsapp\Infrastructure\infrastructure.csproj" /> -->
+    <ProjectReference Include="..\application\Application.csproj" />
+    <ProjectReference Include="..\domain\Domain.csproj" />
+
+
+
+  </ItemGroup>
+ <ItemGroup>
+<Protobuf Include="..\..\..\..\..\HR\modules\Employees\dotnet\presentation\grpc\protos\hr.proto"
+          GrpcServices="Client" />
+  </ItemGroup>
+
+</Project>
