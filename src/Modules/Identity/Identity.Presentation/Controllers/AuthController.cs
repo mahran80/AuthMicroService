@@ -11,10 +11,12 @@ using Identity.Application.Features.Revoke;
 using Identity.Application.Features.SocialLogin;
 using Identity.Application.Features.VerifyOtp;
 using Identity.Presentation.Contracts;
+using Identity.Presentation.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using SharedKernel.Presentation;
 
 namespace Identity.Presentation.Controllers;
@@ -24,14 +26,19 @@ namespace Identity.Presentation.Controllers;
 public sealed class AuthController : ControllerBase
 {
     private readonly ISender _sender;
+    private readonly IAuthCookieService _cookieService;
 
-    public AuthController(ISender sender)
+    public AuthController(
+        ISender sender,
+        IAuthCookieService cookieService)
     {
         _sender = sender;
+        _cookieService = cookieService;
     }
 
     [HttpPost("register")]
     [AllowAnonymous]
+    [EnableRateLimiting("AuthEmail")]
     [ProducesResponseType(typeof(RegisterUserResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
@@ -59,6 +66,7 @@ public sealed class AuthController : ControllerBase
 
     [HttpPost("login")]
     [AllowAnonymous]
+    [EnableRateLimiting("AuthLogin")]
     [ProducesResponseType(typeof(AuthTokenResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
@@ -75,11 +83,19 @@ public sealed class AuthController : ControllerBase
             return result.ToProblemDetails(HttpContext);
         }
 
+        _cookieService.SetTokenCookies(
+            Response,
+            result.Value.AccessToken,
+            result.Value.AccessTokenExpiresAtUtc,
+            result.Value.RefreshToken,
+            result.Value.RefreshTokenExpiresAtUtc);
+
         return Ok(result.Value);
     }
 
     [HttpPost("social-login")]
     [AllowAnonymous]
+    [EnableRateLimiting("AuthLogin")]
     [ProducesResponseType(typeof(AuthTokenResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
@@ -96,11 +112,19 @@ public sealed class AuthController : ControllerBase
             return result.ToProblemDetails(HttpContext);
         }
 
+        _cookieService.SetTokenCookies(
+            Response,
+            result.Value.AccessToken,
+            result.Value.AccessTokenExpiresAtUtc,
+            result.Value.RefreshToken,
+            result.Value.RefreshTokenExpiresAtUtc);
+
         return Ok(result.Value);
     }
 
     [HttpPost("login/mobile")]
     [AllowAnonymous]
+    [EnableRateLimiting("AuthLogin")]
     [ProducesResponseType(typeof(OtpDispatchedResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -122,6 +146,7 @@ public sealed class AuthController : ControllerBase
 
     [HttpPost("verify-otp")]
     [AllowAnonymous]
+    [EnableRateLimiting("AuthSensitive")]
     [ProducesResponseType(typeof(AuthTokenResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> VerifyOtp(
@@ -149,11 +174,19 @@ public sealed class AuthController : ControllerBase
             return result.ToProblemDetails(HttpContext);
         }
 
+        _cookieService.SetTokenCookies(
+            Response,
+            result.Value.AccessToken,
+            result.Value.AccessTokenExpiresAtUtc,
+            result.Value.RefreshToken,
+            result.Value.RefreshTokenExpiresAtUtc);
+
         return Ok(result.Value);
     }
 
     [HttpPost("resend-otp")]
     [AllowAnonymous]
+    [EnableRateLimiting("AuthEmail")]
     [ProducesResponseType(typeof(OtpDispatchedResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ResendOtp(
@@ -178,6 +211,7 @@ public sealed class AuthController : ControllerBase
 
     [HttpPost("forgot-password")]
     [AllowAnonymous]
+    [EnableRateLimiting("AuthEmail")]
     [ProducesResponseType(typeof(PasswordResetDispatchedResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ForgotPassword(
@@ -198,6 +232,7 @@ public sealed class AuthController : ControllerBase
 
     [HttpPost("reset-password")]
     [AllowAnonymous]
+    [EnableRateLimiting("AuthSensitive")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ResetPassword(
@@ -222,10 +257,29 @@ public sealed class AuthController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Refresh(
-        [FromBody] RefreshTokenRequest request,
-        CancellationToken cancellationToken)
+        [FromBody] RefreshTokenRequest? request = null,
+        CancellationToken cancellationToken = default)
     {
-        var command = new RefreshTokenCommand(request.RefreshToken);
+        string? refreshToken = request?.RefreshToken;
+        if (string.IsNullOrWhiteSpace(refreshToken))
+        {
+            Request.Cookies.TryGetValue(AuthCookieService.RefreshTokenCookieName, out refreshToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(refreshToken))
+        {
+            var problemDetails = new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Bad Request",
+                Detail = "Refresh token must be provided via request body or cookie.",
+                Instance = HttpContext.Request.Path
+            };
+            problemDetails.Extensions["errorCode"] = "Identity.InvalidRefreshToken";
+            return BadRequest(problemDetails);
+        }
+
+        var command = new RefreshTokenCommand(refreshToken);
 
         var result = await _sender.Send(command, cancellationToken);
 
@@ -233,6 +287,13 @@ public sealed class AuthController : ControllerBase
         {
             return result.ToProblemDetails(HttpContext);
         }
+
+        _cookieService.SetTokenCookies(
+            Response,
+            result.Value.AccessToken,
+            result.Value.AccessTokenExpiresAtUtc,
+            result.Value.RefreshToken,
+            result.Value.RefreshTokenExpiresAtUtc);
 
         return Ok(result.Value);
     }
@@ -243,10 +304,29 @@ public sealed class AuthController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Revoke(
-        [FromBody] RevokeTokenRequest request,
-        CancellationToken cancellationToken)
+        [FromBody] RevokeTokenRequest? request = null,
+        CancellationToken cancellationToken = default)
     {
-        var command = new RevokeTokenCommand(request.RefreshToken);
+        string? refreshToken = request?.RefreshToken;
+        if (string.IsNullOrWhiteSpace(refreshToken))
+        {
+            Request.Cookies.TryGetValue(AuthCookieService.RefreshTokenCookieName, out refreshToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(refreshToken))
+        {
+            var problemDetails = new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Bad Request",
+                Detail = "Refresh token must be provided via request body or cookie.",
+                Instance = HttpContext.Request.Path
+            };
+            problemDetails.Extensions["errorCode"] = "Identity.InvalidRefreshToken";
+            return BadRequest(problemDetails);
+        }
+
+        var command = new RevokeTokenCommand(refreshToken);
 
         var result = await _sender.Send(command, cancellationToken);
 
@@ -254,6 +334,8 @@ public sealed class AuthController : ControllerBase
         {
             return result.ToProblemDetails(HttpContext);
         }
+
+        _cookieService.ClearTokenCookies(Response);
 
         return Ok(new { message = "Refresh token has been successfully revoked." });
     }

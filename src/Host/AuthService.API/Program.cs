@@ -10,6 +10,7 @@ using Identity.Application;
 using Identity.Infrastructure;
 using Identity.Infrastructure.Persistence;
 using Identity.Infrastructure.Security;
+using Identity.Presentation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
@@ -35,10 +36,14 @@ builder.Services.AddProblemDetails();
 // Modular Clean Architecture DI Registrations
 builder.Services.AddIdentityApplication();
 builder.Services.AddIdentityInfrastructure(builder.Configuration);
+builder.Services.AddIdentityPresentation();
 builder.Services.AddAccessControlApplication();
 builder.Services.AddAccessControlInfrastructure(builder.Configuration);
 builder.Services.AddUsersApplication();
 builder.Services.AddUsersInfrastructure(builder.Configuration);
+
+// Rate Limiting
+builder.Services.AddAuthRateLimiting();
 
 // Health Checks
 builder.Services.AddHealthChecks()
@@ -71,6 +76,20 @@ builder.Services.AddAuthentication(options =>
         RoleClaimType = "roles",
         NameClaimType = "name"
     };
+
+    // Dual token extraction: Header Bearer token OR HttpOnly accessToken cookie
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            if (string.IsNullOrEmpty(context.Token) &&
+                context.Request.Cookies.TryGetValue("accessToken", out var cookieToken))
+            {
+                context.Token = cookieToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
 // Dynamic RBAC Permission Authorization
@@ -93,6 +112,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();
