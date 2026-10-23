@@ -1,73 +1,87 @@
-# Enterprise Authentication & Role-Based Access Control (RBAC) Microservice
+# Enterprise Authentication, Users & Role-Based Access Control (RBAC) Microservice
 
 [![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
 [![C# 12](https://img.shields.io/badge/C%23-12.0-239120?logo=csharp&logoColor=white)](https://learn.microsoft.com/dotnet/csharp/)
-[![Clean Architecture](https://img.shields.io/badge/Architecture-Hexagonal%20%2F%20Clean-blue)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+[![Clean Architecture](https://img.shields.io/badge/Architecture-Modular%20Clean%20%2F%20Hexagonal-blue)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 [![EF Core 8](https://img.shields.io/badge/EF%20Core-8.0-purple)](https://learn.microsoft.com/ef/core/)
 [![SQL Server](https://img.shields.io/badge/Database-SQL%20Server-CC292B?logo=microsoftsqlserver&logoColor=white)](https://www.microsoft.com/sql-server)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Production-grade, enterprise-scale Authentication and Dynamic RBAC Authorization Microservice built with **.NET 8**, **Clean Architecture**, **Hexagonal Ports & Adapters**, and **CQRS (MediatR)**.
+Production-grade, enterprise-scale Modular Clean Architecture Microservice unifying **Identity & Authentication**, **User Profiles**, and **Dynamic RBAC Authorization** built with **.NET 8**, **Hexagonal Ports & Adapters**, and **CQRS (MediatR)**.
 
 ---
 
 ## 📑 Table of Contents
-- [🏛️ Architecture Overview](#️-architecture-overview)
+- [🏛️ Unified Architecture Overview](#️-unified-architecture-overview)
+- [🧩 Module Boundaries & Schema Isolation](#-module-boundaries--schema-isolation)
 - [📂 Solution Directory Structure](#-solution-directory-structure)
-- [📚 Comprehensive Documentation](#-comprehensive-documentation)
 - [🚀 Quick Start Guide](#-quick-start-guide)
 - [🔑 Pre-Seeded Accounts & Credentials](#-pre-seeded-accounts--credentials)
 - [🛡️ RBAC Permission Matrix](#️-rbac-permission-matrix)
 - [📡 API Endpoints Reference](#-api-endpoints-reference)
+  - [1. Authentication & Identity (`/api/v1/auth`)](#1-authentication--identity-apiv1auth)
+  - [2. User Profiles (`/api/v1/users`)](#2-user-profiles-apiv1users)
+  - [3. Access Control & RBAC (`/api/v1/rbac`)](#3-access-control--rbac-apiv1rbac)
+  - [4. Operational Health Checks (`/health`)](#4-operational-health-checks-health)
 - [🔒 Security & Production Engineering Highlights](#-security--production-engineering-highlights)
-- [🧪 Testing in Swagger UI](#-testing-in-swagger-ui)
+- [🧪 Testing in Swagger UI & Browser](#-testing-in-swagger-ui--browser)
 
 ---
 
-## 🏛️ Architecture Overview
+## 🏛️ Unified Architecture Overview
 
-The microservice follows strict **Clean Architecture** and **Hexagonal (Ports & Adapters)** principles with complete domain isolation:
+The microservice follows strict **Modular Clean Architecture** and **Hexagonal (Ports & Adapters)** principles. The host (`AuthService.API`) bootstraps three autonomous business modules, each composed of isolated `.Domain`, `.Application`, `.Infrastructure`, and `.Presentation` class libraries:
 
 ```
-                            +-----------------------------------+
-                            |        Primary / Driving          |
-                            |   (AuthService.API Controllers)   |
-                            +-----------------+-----------------+
-                                              |
-                                              v
-                            +-----------------+-----------------+
-                            |     Application Inbound Ports     |
-                            |         (MediatR CQRS)            |
-                            +-----------------+-----------------+
-                                              |
-                                              v
-                            +-----------------+-----------------+
-                            |          Domain Core              |
-                            |   (Pure C# - Zero Dep on EF/Web)  |
-                            +-----------------+-----------------+
-                                              ^
-                                              |
-                            +-----------------+-----------------+
-                            |    Secondary / Driven Adapters    |
-                            |   (EF Core 8, BCrypt, JWT Provider)|
-                            +-----------------------------------+
+                            +-----------------------------------------------+
+                            |             Host (AuthService.API)            |
+                            |  Middleware, Dual Token Extractor, Rate Limits|
+                            +-----------------------+-----------------------+
+                                                    |
+         +------------------------------------------+------------------------------------------+
+         |                                          |                                          |
+         v                                          v                                          v
++-------------------------+        +----------------------------------+        +-------------------------+
+|     Identity Module     |        |      Access Control (RBAC)       |        |      Users Module       |
+| [identity] DbContext    |        |        [rbac] DbContext          |        |    [users] DbContext    |
+| - Password & Mobile Auth|        | - Granular Permission Catalog    |        | - User Profile Aggregate|
+| - UltraMsg WhatsApp OTP |        | - Roles & Role-Permissions       |        | - Contact Information   |
+| - Smtp Password Reset   |        | - User-to-Role Dynamic Mappings  |        | - Profile Pagination    |
+| - 5 OAuth2 Providers    |        | - Token Revocation Cascade       |        | - Soft-Delete/Restore   |
+| - LoginSession Tracking |        | - Permission Requirement Handler |        | - Cross-Module Sync Port|
++-------------------------+        +----------------------------------+        +-------------------------+
+         ^                                          ^                                          ^
+         +------------------------------------------+------------------------------------------+
+                                                    |
+                                    +---------------+---------------+
+                                    |    SharedKernel Contracts     |
+                                    | IUserProfilePort, IRbacPort,  |
+                                    | IUserIdentityPort, Result<T>  |
+                                    +-------------------------------+
 ```
 
-### Module Boundaries & Schema Isolation
-The database is partitioned into two isolated schemas with **zero cross-schema foreign keys**:
-1. **`identity` Schema:**
-   - `identity.Users` — UUID primary key, unique email index, BCrypt password hash, user status.
-   - `identity.RefreshTokens` — Cryptographic refresh tokens with automatic rotation, revocation, and device tracking.
-2. **`rbac` Schema:**
-   - `rbac.Roles` — System roles and dynamic custom roles.
-   - `rbac.Permissions` — Granular permission catalog.
-   - `rbac.RolePermissions` — Role-to-permission mapping.
-   - `rbac.UserRoles` — User-to-role assignment using unconstrained UUIDs across boundary.
+---
 
-### Cross-Module Communication (Hexagonal Ports)
-- Modules interact strictly via Outbound Ports defined in `SharedKernel.Contracts`:
-  - `IRbacAccessPort`: Used by Identity to fetch user roles/permissions and assign default roles on registration.
-  - `IUserIdentityPort`: Used by AccessControl to verify user existence and cascade revocation of active tokens upon status modification.
+## 🧩 Module Boundaries & Schema Isolation
+
+The database is segregated into three completely independent SQL Server schemas with **zero cross-schema foreign keys**:
+
+1. **`identity` Schema (`IdentityDbContext`):**
+   - `identity.Users` — Aggregate root with email, BCrypt password hash, country code, phone number, verification flags, and status.
+   - `identity.RefreshTokens` — Cryptographic refresh tokens with automatic rotation and revocation.
+   - `identity.OtpVerifications` — SHA-256 hashed 6-digit codes with 5-minute expiry, purpose tracking, and attempt limits.
+   - `identity.PasswordResetTokens` — SHA-256 hashed reset & invite tokens with 15-minute / 24-hour expiration.
+   - `identity.LoginSessions` — Audit logs tracking device names, client IP addresses, user agents, and session lifecycles.
+   - `identity.ExternalLogins` — OAuth2 provider bindings (`Google`, `Facebook`, `GitHub`, `LinkedIn`, `Microsoft`).
+
+2. **`rbac` Schema (`AccessControlDbContext`):**
+   - `rbac.Roles` — System roles (`SuperAdmin`, `Manager`, `StandardUser`) and custom administrator-defined roles.
+   - `rbac.Permissions` — Granular permission catalog codes.
+   - `rbac.RolePermissions` — Many-to-many role-to-permission mappings.
+   - `rbac.UserRoles` — User-to-role assignments mapped via unconstrained `UserId` GUIDs.
+
+3. **`users` Schema (`UsersDbContext`):**
+   - `users.UserProfiles` — Isolated profile aggregate root containing user email, full name, phone number, and soft-delete audit trail.
 
 ---
 
@@ -75,50 +89,33 @@ The database is partitioned into two isolated schemas with **zero cross-schema f
 
 ```plaintext
 AuthMicroservice/
-├── Docs/                                 # Complete architecture & defense documentation
-│   ├── 01-PRD-and-Requirements.md
-│   ├── 02-Architecture-and-Hexagonal-Design.md
-│   ├── 03-State-and-Sequence-Diagrams.md
-│   ├── 04-Database-Schema-and-DDL.md
-│   ├── 05-API-Contracts-and-Swagger-Spec.md
-│   ├── 06-Master-Implementation-Plan.md
-│   ├── 07-Agent-Execution-Prompts.md
-│   └── 08-Complete-Project-Walkthrough-and-Defense-Guide.md
+├── Docs/                                          # Architecture, PRD, and Unification specifications
+│   ├── 08-Team-Unification-Master-Plan.md
+│   └── 09-Unification-Agent-Prompts.md
 ├── src/
 │   ├── Shared/
-│   │   └── SharedKernel/                 # Shared Result pattern, DDD base primitives & Port contracts
+│   │   └── SharedKernel/                          # Result pattern, Base Entity, CQRS Primitives, Presentation helpers
 │   ├── Modules/
 │   │   ├── Identity/
-│   │   │   ├── Identity.Domain/          # User & RefreshToken entities, enum, domain errors
-│   │   │   ├── Identity.Application/     # CQRS Commands/Queries, FluentValidation, Ports
-│   │   │   └── Identity.Infrastructure/  # EF Core DbContext, JWT Provider, BCrypt Hasher
-│   │   └── AccessControl/
-│   │       ├── AccessControl.Domain/     # Role, Permission, UserRole entities & domain logic
-│   │       ├── AccessControl.Application/# RBAC CQRS Commands/Queries & Validators
-│   │       └── AccessControl.Infrastructure/# EF Core AccessControlDbContext & Repositories
+│   │   │   ├── Identity.Domain/                   # User, RefreshToken, OtpVerification, PasswordResetToken, ExternalLogin
+│   │   │   ├── Identity.Application/              # CQRS handlers, FluentValidation, Notification & Social ports
+│   │   │   ├── Identity.Infrastructure/           # EF Core IdentityDbContext, UltraMsg, SMTP, BCrypt, 5 Social Adapters
+│   │   │   └── Identity.Presentation/             # AuthController & IAuthCookieService
+│   │   ├── AccessControl/
+│   │   │   ├── AccessControl.Domain/              # Role, Permission, UserRole entities & domain logic
+│   │   │   ├── AccessControl.Application/         # RBAC CQRS commands/queries & validators
+│   │   │   ├── AccessControl.Infrastructure/      # EF Core AccessControlDbContext & Repositories
+│   │   │   └── AccessControl.Presentation/        # RbacController
+│   │   └── Users/
+│   │       ├── Users.Domain/                      # UserProfile entity & domain errors
+│   │       ├── Users.Application/                 # Profile CQRS commands/queries & ports
+│   │       ├── Users.Infrastructure/              # EF Core UsersDbContext, Repositories & UserProfileAdapter
+│   │       └── Users.Presentation/                # UsersController
 │   └── Host/
-│       └── AuthService.API/              # ASP.NET Core 8 Web API, Swagger, Middleware & Host DI
-├── AuthMicroservice.sln                  # Visual Studio Solution file
-├── .gitignore                            # Clean .NET 8 gitignore
-└── README.md                             # Project overview & documentation
+│       └── AuthService.API/                       # Web API Host, Rate Limiting, Dual Token Extractor, Seeder
+├── AuthMicroservice.sln                           # Unified Solution (14 projects)
+└── README.md
 ```
-
----
-
-## 📚 Comprehensive Documentation
-
-Detailed documentation is available in the [`Docs/`](Docs/) folder:
-
-| Document | Description |
-| :--- | :--- |
-| [01. PRD & Requirements](Docs/01-PRD-and-Requirements.md) | Full business requirements, user stories, security policies, and non-functional requirements. |
-| [02. Architecture & Hexagonal Design](Docs/02-Architecture-and-Hexagonal-Design.md) | Modular monolith architecture, boundary rules, and Hexagonal Ports & Adapters diagram. |
-| [03. State & Sequence Diagrams](Docs/03-State-and-Sequence-Diagrams.md) | Mermaid sequence flows for Registration, Login, Token Refresh, and RBAC authorization. |
-| [04. Database Schema & DDL](Docs/04-Database-Schema-and-DDL.md) | Complete SQL Server DDL, tables, constraints, indexes, and schema segregation rules. |
-| [05. API Contracts & Swagger Spec](Docs/05-API-Contracts-and-Swagger-Spec.md) | Complete OpenAPI/Swagger 3.0 specs, sample JSON payloads, and response codes. |
-| [06. Master Implementation Plan](Docs/06-Master-Implementation-Plan.md) | Phase-by-phase implementation blueprint and technical decisions. |
-| [07. Agent Execution Prompts](Docs/07-Agent-Execution-Prompts.md) | Step-by-step verified execution prompts used to construct the solution. |
-| [08. Complete Walkthrough & Defense Guide](Docs/08-Complete-Project-Walkthrough-and-Defense-Guide.md) | Comprehensive engineering interview defense guide, code deep-dives, and Q&A. |
 
 ---
 
@@ -129,7 +126,7 @@ Detailed documentation is available in the [`Docs/`](Docs/) folder:
 - SQL Server (LocalDB, SQL Express, or Docker SQL Server)
 
 ### 1. Configuration
-Verify database connection and JWT signing key in [`src/Host/AuthService.API/appsettings.json`](src/Host/AuthService.API/appsettings.json):
+Configure database connection string, JWT signing keys, and external service credentials in [`src/Host/AuthService.API/appsettings.json`](src/Host/AuthService.API/appsettings.json):
 ```json
 {
   "ConnectionStrings": {
@@ -141,11 +138,33 @@ Verify database connection and JWT signing key in [`src/Host/AuthService.API/app
     "Audience": "EnterpriseMicroservices",
     "AccessTokenExpirationMinutes": 15,
     "RefreshTokenExpirationDays": 7
+  },
+  "UltraMsg": {
+    "InstanceId": "",
+    "Token": "",
+    "BaseUrl": "https://api.ultramsg.com"
+  },
+  "Smtp": {
+    "Host": "",
+    "Port": 587,
+    "Username": "",
+    "Password": "",
+    "FromEmail": "noreply@authservice.com",
+    "FromName": "Auth Service",
+    "EnableSsl": true,
+    "FrontendResetUrl": "http://localhost:4200/#/set-password"
+  },
+  "Authentication": {
+    "Google": { "ClientId": "" },
+    "Facebook": { "AppId": "", "AppSecret": "" },
+    "GitHub": { "ClientId": "", "ClientSecret": "", "RedirectUri": "" },
+    "LinkedIn": { "ClientId": "", "ClientSecret": "", "RedirectUri": "" },
+    "Microsoft": { "ClientId": "", "ClientSecret": "", "RedirectUri": "", "TenantId": "common" }
   }
 }
 ```
 
-### 2. Build the Solution
+### 2. Build the Entire Solution
 ```bash
 dotnet build AuthMicroservice.sln
 ```
@@ -155,25 +174,18 @@ dotnet build AuthMicroservice.sln
 dotnet run --project src/Host/AuthService.API
 ```
 
-> **Automatic Migration & Seeding:** On startup, the service automatically executes EF Core migrations for both `identity` and `rbac` schemas and seeds initial permissions, roles, and default accounts.
-
-### 4. Access Interactive API Documentation
-Open your browser and navigate to:
-```
-http://localhost:5000/swagger
-```
-*(or `https://localhost:5001/swagger` if running over HTTPS)*
+> **Automatic Multi-Context Migration & Seeding:** On startup, `DatabaseSeeder` automatically runs EF Core migrations for `[identity]`, `[rbac]`, and `[users]` schemas, populating permissions, system roles, default accounts, and synchronized user profiles.
 
 ---
 
 ## 🔑 Pre-Seeded Accounts & Credentials
 
-The database is pre-seeded with two accounts for immediate testing:
+The service seeds two pre-configured, verified accounts out of the box:
 
-| Role | Email | Password | Assigned Permissions |
-| :--- | :--- | :--- | :--- |
-| **SuperAdmin** | `admin@authservice.local` | `Admin@12345!` | `auth:profile:read`, `users:read`, `users:manage`, `roles:read`, `roles:write`, `roles:manage` |
-| **StandardUser** | `user@authservice.local` | `User@12345!` | `auth:profile:read` |
+| Role | Email | Password | Phone | Assigned Permissions |
+| :--- | :--- | :--- | :--- | :--- |
+| **SuperAdmin** | `admin@authservice.local` | `Admin@12345!` | `+20 1000000001` (Verified) | `auth:profile:read`, `users:read`, `users:manage`, `roles:read`, `roles:write`, `roles:manage` |
+| **StandardUser** | `user@authservice.local` | `User@12345!` | `+20 1000000002` (Verified) | `auth:profile:read` |
 
 ---
 
@@ -182,9 +194,9 @@ The database is pre-seeded with two accounts for immediate testing:
 | Permission Code | Module Group | Description | SuperAdmin | Manager | StandardUser |
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | `auth:profile:read` | `Identity` | Read own authenticated profile (`/me`) | ✅ | ✅ | ✅ |
-| `users:read` | `AccessControl` | View users and role assignments | ✅ | ✅ | ❌ |
-| `users:manage` | `AccessControl` | Assign roles & modify user status | ✅ | ❌ | ❌ |
-| `roles:read` | `AccessControl` | View all roles and permissions | ✅ | ✅ | ❌ |
+| `users:read` | `AccessControl` | View users, profiles, and role assignments | ✅ | ✅ | ❌ |
+| `users:manage` | `AccessControl` | Create/edit profiles, assign roles & modify status | ✅ | ✅ | ❌ |
+| `roles:read` | `AccessControl` | View all roles and permission catalog | ✅ | ✅ | ❌ |
 | `roles:write` | `AccessControl` | Create new custom roles | ✅ | ❌ | ❌ |
 | `roles:manage` | `AccessControl` | Bind/unbind permissions to roles | ✅ | ❌ | ❌ |
 
@@ -192,67 +204,69 @@ The database is pre-seeded with two accounts for immediate testing:
 
 ## 📡 API Endpoints Reference
 
-### Identity & Authentication (`/api/v1/auth`)
-| Method | Endpoint | Description | Auth Required |
-| :--- | :--- | :--- | :---: |
-| `POST` | `/api/v1/auth/register` | Register a new user (automatically assigned `StandardUser`) | Anonymous |
-| `POST` | `/api/v1/auth/login` | Authenticate with email/password; returns JWT access & refresh token | Anonymous |
-| `POST` | `/api/v1/auth/refresh` | Exchange active refresh token for rotated refresh & access tokens | Anonymous |
-| `POST` | `/api/v1/auth/revoke` | Revoke an active refresh token | `[Authorize]` |
-| `GET` | `/api/v1/auth/me` | Read current user identity, assigned roles, and permissions | `[HasPermission("auth:profile:read")]` |
+### 1. Authentication & Identity (`/api/v1/auth`)
+| Method | Endpoint | Description | Rate Limit Policy | Auth Required |
+| :--- | :--- | :--- | :--- | :---: |
+| `POST` | `/api/v1/auth/register` | Register new account & dispatch WhatsApp OTP | `AuthEmail` (3/min) | Anonymous |
+| `POST` | `/api/v1/auth/login` | Authenticate with email/password; returns JWT + sets HttpOnly cookies | `AuthLogin` (5/min) | Anonymous |
+| `POST` | `/api/v1/auth/login/mobile` | Request 6-digit WhatsApp OTP login code | `AuthLogin` (5/min) | Anonymous |
+| `POST` | `/api/v1/auth/verify-otp` | Verify OTP code hash and authenticate session | `AuthSensitive` (5/5min) | Anonymous |
+| `POST` | `/api/v1/auth/resend-otp` | Regenerate and re-send active OTP code | `AuthEmail` (3/min) | Anonymous |
+| `POST` | `/api/v1/auth/social-login` | OAuth2 social login (`google`, `facebook`, `github`, `linkedin`, `microsoft`) | `AuthLogin` (5/min) | Anonymous |
+| `POST` | `/api/v1/auth/forgot-password` | Request password reset email (enumeration-safe) | `AuthEmail` (3/min) | Anonymous |
+| `POST` | `/api/v1/auth/reset-password` | Reset password using cryptographically secure token | `AuthSensitive` (5/5min) | Anonymous |
+| `POST` | `/api/v1/auth/refresh` | Refresh JWT tokens (reads from JSON body or `refreshToken` cookie) | Standard | Anonymous |
+| `POST` | `/api/v1/auth/revoke` | Revoke refresh token and clear cookies | Standard | `[Authorize]` |
+| `GET` | `/api/v1/auth/me` | Read current user identity, roles, and claims | Standard | `[HasPermission("auth:profile:read")]` |
 
-### Access Control & Dynamic RBAC (`/api/v1/rbac`)
+### 2. User Profiles (`/api/v1/users`)
+| Method | Endpoint | Description | Permission Required |
+| :--- | :--- | :--- | :---: |
+| `POST` | `/api/v1/users` | Create user profile with phone and sync to Identity | `users:manage` |
+| `GET` | `/api/v1/users` | List paginated user profiles (`page`, `pageSize`, `search`) | `users:read` |
+| `GET` | `/api/v1/users/{userId}` | Get user profile by user GUID | `users:read` |
+| `GET` | `/api/v1/users/by-phone` | Lookup user profile by country code and phone | `users:read` |
+| `PUT` | `/api/v1/users/{userId}` | Update user profile contact details | `users:manage` |
+| `DELETE` | `/api/v1/users/{userId}` | Soft-delete user profile and revoke active tokens | `users:manage` |
+
+### 3. Access Control & RBAC (`/api/v1/rbac`)
 | Method | Endpoint | Description | Permission Required |
 | :--- | :--- | :--- | :---: |
 | `POST` | `/api/v1/rbac/roles` | Create a new custom role | `roles:write` |
 | `GET` | `/api/v1/rbac/roles` | List all roles with assigned permissions | `roles:read` |
-| `GET` | `/api/v1/rbac/permissions` | List all available granular permissions | `roles:read` |
+| `GET` | `/api/v1/rbac/permissions` | List all granular system permissions | `roles:read` |
 | `PUT` | `/api/v1/rbac/roles/{roleId}/permissions` | Update permissions assigned to a role | `roles:manage` |
 | `POST` | `/api/v1/rbac/users/{userId}/roles` | Assign a role to a user | `users:manage` |
-| `PATCH` | `/api/v1/rbac/users/{userId}/status` | Update user status (`Active`/`Suspended`/`Deactivated`) & revoke tokens | `users:manage` |
+| `PATCH` | `/api/v1/rbac/users/{userId}/status` | Update user status (`Active`/`Suspended`/`Deactivated`) & cascade token revocation | `users:manage` |
 
-### Operational & Health Checks
+### 4. Operational Health Checks (`/health`)
 | Method | Endpoint | Description | Auth Required |
 | :--- | :--- | :--- | :---: |
-| `GET` | `/health` | Verifies database connectivity and readiness across both DB schemas | Anonymous |
+| `GET` | `/health` | Verifies database connectivity and readiness across `[identity]`, `[rbac]`, and `[users]` | Anonymous |
 
 ---
 
 ## 🔒 Security & Production Engineering Highlights
 
-- **Cryptographic Refresh Token Rotation:** Every refresh operation invalidates the existing token and generates a cryptographically random replacement (`RNGCryptoServiceProvider`). Revoked or reused tokens cannot be exchanged.
-- **BCrypt Password Hashing:** User passwords are encrypted with adaptive work-factor BCrypt hashing before persistence.
-- **Granular Permission Authorization Handler:** Claims-based authorization using ASP.NET Core `IAuthorizationRequirement` and `AuthorizationHandler<PermissionRequirement>`.
-- **Zero Cross-Schema Foreign Keys:** Strict logical boundary isolation ensuring the Identity and Access Control modules can be split into separate physical microservices with zero database refactoring.
-- **Cross-Cutting Pipeline Behaviors:** MediatR validation pipeline behavior (`ValidationBehavior`) intercepting incoming commands with FluentValidation before reaching domain handlers.
-- **Centralized Global Exception Handling:** Clean RFC 7807 `ProblemDetails` responses across all unhandled errors and domain validation exceptions.
+- **Pre-Hijacking Attack Defense:** When linking a verified social provider to an unverified existing local account, the system automatically invalidates any pre-registered attacker password before verifying the email.
+- **SHA-256 Hashing for OTPs & Reset Tokens:** OTP codes and password reset tokens are never stored in plaintext in the database.
+- **Strict SameSite HttpOnly Cookies:** JWT tokens are dispatched both in the JSON payload (for mobile/Swagger) and inside `SameSite = Strict; HttpOnly; Secure` cookies.
+- **Dual Token Extraction Middleware:** The API automatically extracts JWTs from either the `Authorization: Bearer <token>` header or the `accessToken` HttpOnly cookie.
+- **IP Partition Rate Limiting:** Enforces strict fixed-window rate limiting on login, registration, and password reset endpoints returning RFC 7807 `429 Too Many Requests`.
+- **Enumeration Attack Prevention:** The `/forgot-password` endpoint returns identical success responses regardless of whether the email is registered.
+- **Zero Cross-Schema Foreign Keys:** Strict database logical boundary isolation enabling independent scaling and splitting into separate physical microservices with zero schema redesign.
 
 ---
 
-## 🧪 Testing in Swagger UI
+## 🧪 Testing in Swagger UI & Browser
 
-1. Run the API and open `http://localhost:5000/swagger`.
-2. Expand `POST /api/v1/auth/login` and click **Try it out**.
-3. Use the pre-seeded admin credentials:
+1. Run the application and navigate to `http://localhost:5000/swagger`.
+2. Execute `POST /api/v1/auth/login` using the pre-seeded credentials:
    ```json
    {
      "email": "admin@authservice.local",
      "password": "Admin@12345!"
    }
    ```
-4. Copy the `accessToken` value from the response body.
-5. Click the green **Authorize** button at the top right of the Swagger UI.
-6. Enter:
-   ```text
-   Bearer <your_copied_token>
-   ```
-7. Click **Authorize** and **Close**.
-8. Test protected endpoints:
-   - `GET /api/v1/auth/me`
-   - `GET /api/v1/rbac/roles`
-   - `POST /api/v1/rbac/roles`
-
----
-
-## 📄 License
-This project is licensed under the [MIT License](LICENSE).
+3. The response will include both the `accessToken` JSON payload and `Set-Cookie` response headers.
+4. Copy the `accessToken`, click **Authorize** at the top right, enter `Bearer <your_token>`, and test protected endpoints across `/api/v1/auth/me`, `/api/v1/users`, and `/api/v1/rbac/roles`.
