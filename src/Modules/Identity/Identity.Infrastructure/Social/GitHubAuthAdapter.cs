@@ -36,8 +36,13 @@ public sealed class GitHubAuthAdapter : ISocialAuthProviderPort
         }
 
         var githubOptions = _options.GitHub;
-        if (string.IsNullOrWhiteSpace(githubOptions.ClientId) ||
-            string.IsNullOrWhiteSpace(githubOptions.ClientSecret))
+        string trimmedCredential = credential.Trim();
+        bool isDirectAccessToken = trimmedCredential.StartsWith("gho_", StringComparison.OrdinalIgnoreCase) ||
+                                   trimmedCredential.StartsWith("ghp_", StringComparison.OrdinalIgnoreCase) ||
+                                   trimmedCredential.StartsWith("github_pat_", StringComparison.OrdinalIgnoreCase);
+
+        if (!isDirectAccessToken && (string.IsNullOrWhiteSpace(githubOptions.ClientId) ||
+            string.IsNullOrWhiteSpace(githubOptions.ClientSecret)))
         {
             _logger.LogWarning("GitHub OAuth ClientId or ClientSecret is not configured.");
             return Result.Failure<ExternalUserInfo>(IdentityErrors.SocialProviderNotConfigured(ProviderName));
@@ -45,7 +50,10 @@ public sealed class GitHubAuthAdapter : ISocialAuthProviderPort
 
         try
         {
-            string? accessToken = await ExchangeCodeForTokenAsync(credential, githubOptions, ct);
+            string? accessToken = isDirectAccessToken
+                ? trimmedCredential
+                : await ExchangeCodeForTokenAsync(trimmedCredential, githubOptions, ct);
+
             if (string.IsNullOrWhiteSpace(accessToken))
             {
                 return Result.Failure<ExternalUserInfo>(IdentityErrors.InvalidSocialCredential(ProviderName));

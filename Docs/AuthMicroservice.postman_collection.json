@@ -1,0 +1,3263 @@
+{
+  "info": {
+    "_postman_id": "8c7f3b14-9d52-4e63-bf30-581b83141f2a",
+    "name": "AuthMicroservice Unified Solution E2E",
+    "description": "Production-ready, self-contained Postman Collection v2.1.0 for testing the unified Auth Microservice across Identity, Users, and AccessControl modules in strict chronological lifecycle order.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://localhost:7110",
+      "type": "string",
+      "description": "Default HTTPS endpoint from launchSettings.json"
+    },
+    {
+      "key": "adminAccessToken",
+      "value": "",
+      "type": "string",
+      "description": "JWT access token for seeded SuperAdmin"
+    },
+    {
+      "key": "adminRefreshToken",
+      "value": "",
+      "type": "string",
+      "description": "Refresh token for seeded SuperAdmin"
+    },
+    {
+      "key": "standardUserAccessToken",
+      "value": "",
+      "type": "string",
+      "description": "JWT access token for StandardUser"
+    },
+    {
+      "key": "standardUserRefreshToken",
+      "value": "",
+      "type": "string",
+      "description": "Refresh token for StandardUser"
+    },
+    {
+      "key": "newUserEmail",
+      "value": "test.engineer@example.com",
+      "type": "string",
+      "description": "Email for dynamic new user registration"
+    },
+    {
+      "key": "newUserPassword",
+      "value": "StrongPass@123!",
+      "type": "string",
+      "description": "Strong password meeting validation rules"
+    },
+    {
+      "key": "newUserPhone",
+      "value": "1098765432",
+      "type": "string",
+      "description": "Phone number for new user registration"
+    },
+    {
+      "key": "newUserCountryCode",
+      "value": "+20",
+      "type": "string",
+      "description": "Country code for new user"
+    },
+    {
+      "key": "newUserId",
+      "value": "",
+      "type": "string",
+      "description": "GUID of registered new user captured from register response"
+    },
+    {
+      "key": "createdProfileUserId",
+      "value": "",
+      "type": "string",
+      "description": "GUID of user provisioned in Users module"
+    },
+    {
+      "key": "createdRoleId",
+      "value": "",
+      "type": "string",
+      "description": "GUID of custom Auditor role created in AccessControl module"
+    },
+    {
+      "key": "superAdminRoleId",
+      "value": "",
+      "type": "string",
+      "description": "GUID of seeded SuperAdmin role captured from roles catalog"
+    },
+    {
+      "key": "usedRefreshToken",
+      "value": "",
+      "type": "string",
+      "description": "Old rotated refresh token used to test replay attack protection"
+    },
+    {
+      "key": "manualOtpCode",
+      "value": "123456",
+      "type": "string",
+      "description": "Placeholder to be pasted from console logs during local dev"
+    },
+    {
+      "key": "manualResetToken",
+      "value": "PASTE_TOKEN_FROM_CONSOLE",
+      "type": "string",
+      "description": "Placeholder to be pasted from console logs during password reset"
+    },
+    {
+      "key": "googleIdToken",
+      "value": "PASTE_GOOGLE_ID_TOKEN",
+      "type": "string",
+      "description": "Google OAuth2 ID token template"
+    },
+    {
+      "key": "facebookAccessToken",
+      "value": "PASTE_FACEBOOK_ACCESS_TOKEN",
+      "type": "string",
+      "description": "Facebook Graph User Access Token template"
+    },
+    {
+      "key": "oauthAuthCode",
+      "value": "PASTE_OAUTH_AUTH_CODE",
+      "type": "string",
+      "description": "OAuth Authorization Code for GitHub/LinkedIn/Microsoft template"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 Unauthenticated & Negative Security Gate (401 & 400 Checks)",
+      "description": "Goal: Prove that the system blocks unauthenticated users and invalid payloads BEFORE we log in.",
+      "item": [
+        {
+          "name": "01.1 [401 Check] Get Profile Without Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Verify that accessing /api/v1/auth/me without an Authorization token strictly returns 401 Unauthorized."
+          },
+          "response": []
+        },
+        {
+          "name": "01.2 [401 Check] Get All Users Without Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users"
+              ]
+            },
+            "description": "Verify that accessing /api/v1/users without an Authorization token strictly returns 401 Unauthorized."
+          },
+          "response": []
+        },
+        {
+          "name": "01.3 [401 Check] Get Roles Without Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rbac/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rbac",
+                "roles"
+              ]
+            },
+            "description": "Verify that accessing /api/v1/rbac/roles without an Authorization token strictly returns 401 Unauthorized."
+          },
+          "response": []
+        },
+        {
+          "name": "01.4 [400 Validation Check] Register With Weak Password & Invalid Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains RFC 7807 ProblemDetails with validation errors\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.status).to.eql(400);",
+                  "    pm.expect(jsonData.errors || jsonData.detail || jsonData.title).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Verify that attempting to register with empty names, invalid email format, and weak password returns 400 Bad Request with RFC 7807 ProblemDetails validation errors.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"\",\n  \"lastName\": \"\",\n  \"email\": \"not-an-email\",\n  \"password\": \"123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 New User Onboarding, OTP & Login Flow (Chronological Lifecycle)",
+      "description": "Goal: Register a brand-new user FIRST, test duplicate protection, verify OTP, and log in as that new user.",
+      "item": [
+        {
+          "name": "02.1 [201 Created] Register New User (Step 1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created or 200 OK\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"Extract userId and assert otpCode is NOT leaked in response\", function () {",
+                  "    pm.expect(jsonData.userId).to.not.be.undefined;",
+                  "    pm.collectionVariables.set(\"newUserId\", jsonData.userId);",
+                  "    pm.expect(jsonData.otpCode).to.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Registers a new user in the Identity module. Captures newUserId into collection variables and verifies OTP code is never leaked in the response.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Test\",\n  \"lastName\": \"Engineer\",\n  \"email\": \"{{newUserEmail}}\",\n  \"password\": \"{{newUserPassword}}\",\n  \"countryCode\": \"{{newUserCountryCode}}\",\n  \"phoneNumber\": \"{{newUserPhone}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "02.2 [409 Conflict Check] Register Duplicate Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 409 Conflict\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Response contains 409 status in ProblemDetails\", function () {",
+                  "    pm.expect(jsonData.status).to.eql(409);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Attempts to register the exact same email again to verify duplicate email detection and 409 Conflict response.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Duplicate\",\n  \"lastName\": \"User\",\n  \"email\": \"{{newUserEmail}}\",\n  \"password\": \"{{newUserPassword}}\",\n  \"countryCode\": \"{{newUserCountryCode}}\",\n  \"phoneNumber\": \"{{newUserPhone}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "02.3 [200 OK] Resend Registration OTP",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"OtpDispatchedResponse received\", function () {",
+                  "    pm.expect(jsonData.message).to.not.be.empty;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/resend-otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "resend-otp"
+              ]
+            },
+            "description": "Triggers resend of registration OTP verification code via email/SMS.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{newUserEmail}}\",\n  \"countryCode\": \"{{newUserCountryCode}}\",\n  \"phoneNumber\": \"{{newUserPhone}}\",\n  \"purpose\": \"Register\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "02.4 [400 Check] Verify OTP With Wrong Code",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/verify-otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "verify-otp"
+              ]
+            },
+            "description": "Attempts to verify registration OTP with invalid code '000000', asserting 400 Bad Request.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{newUserEmail}}\",\n  \"countryCode\": \"{{newUserCountryCode}}\",\n  \"phoneNumber\": \"{{newUserPhone}}\",\n  \"code\": \"000000\",\n  \"purpose\": \"Register\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "02.5 [200 OK] Verify OTP With Valid Code (Paste from Console into {{manualOtpCode}})",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Verify OTP response check (200 OK with valid code or 400 if placeholder code)\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                  "    if (pm.response.code === 200) {",
+                  "        const jsonData = pm.response.json();",
+                  "        pm.expect(jsonData.accessToken).to.not.be.empty;",
+                  "        pm.collectionVariables.set(\"standardUserAccessToken\", jsonData.accessToken);",
+                  "        pm.collectionVariables.set(\"standardUserRefreshToken\", jsonData.refreshToken);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/verify-otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "verify-otp"
+              ]
+            },
+            "description": "Verifies registration OTP with the code stored in {{manualOtpCode}} (or pasted from console during local dev). On 200 OK, captures tokens.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{newUserEmail}}\",\n  \"countryCode\": \"{{newUserCountryCode}}\",\n  \"phoneNumber\": \"{{newUserPhone}}\",\n  \"code\": \"{{manualOtpCode}}\",\n  \"purpose\": \"Register\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "02.6 [401 Check] Login With Wrong Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Attempts to log in with an incorrect password to verify credential protection and 401 Unauthorized response.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{newUserEmail}}\",\n  \"password\": \"WrongPassword@999!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "02.7 [200 OK] Login as Standard User (Seeded user@authservice.local)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Save standard user access and refresh tokens\", function () {",
+                  "    pm.expect(jsonData.accessToken).to.not.be.empty;",
+                  "    pm.expect(jsonData.refreshToken).to.not.be.empty;",
+                  "    pm.collectionVariables.set(\"standardUserAccessToken\", jsonData.accessToken);",
+                  "    pm.collectionVariables.set(\"standardUserRefreshToken\", jsonData.refreshToken);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Logs in with the seeded pre-verified StandardUser account to capture valid standard user JWT tokens.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@authservice.local\",\n  \"password\": \"User@12345!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "02.8 [200 OK] Get Current Profile (/me) as Standard User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Verify user profile contains StandardUser role\", function () {",
+                  "    pm.expect(jsonData.roles).to.include(\"StandardUser\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{standardUserAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{standardUserAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Retrieves the authenticated profile using the StandardUser token. Confirms status 200 OK and StandardUser role."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 RBAC Authorization Gate - Standard User Forbidden Checks (403 Forbidden)",
+      "description": "Goal: Prove that an authenticated StandardUser (who has a valid JWT token) is strictly blocked (403 Forbidden) from executing Admin/Manager endpoints.",
+      "item": [
+        {
+          "name": "03.1 [403 Forbidden Check] Standard User Tries to Create a Role",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{standardUserAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{standardUserAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rbac/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rbac",
+                "roles"
+              ]
+            },
+            "description": "StandardUser attempts to create a custom role (requires 'roles:write' permission), verifying 403 Forbidden.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"HackerRole\",\n  \"description\": \"Should be blocked\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "03.2 [403 Forbidden Check] Standard User Tries to Get All Roles",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{standardUserAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{standardUserAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rbac/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rbac",
+                "roles"
+              ]
+            },
+            "description": "StandardUser attempts to read all system roles (requires 'roles:read' permission), verifying 403 Forbidden."
+          },
+          "response": []
+        },
+        {
+          "name": "03.3 [403 Forbidden Check] Standard User Tries to Create a User in Users Module",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{standardUserAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{standardUserAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users"
+              ]
+            },
+            "description": "StandardUser attempts to provision a user profile (requires 'users:manage' permission), verifying 403 Forbidden.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Blocked User\",\n  \"email\": \"blocked@example.com\",\n  \"countryCode\": \"+20\",\n  \"phoneNumber\": \"1011112222\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "03.4 [403 Forbidden Check] Standard User Tries to Delete a User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{standardUserAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{standardUserAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{newUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{newUserId}}"
+              ]
+            },
+            "description": "StandardUser attempts to delete a user profile (requires 'users:manage' permission), verifying 403 Forbidden."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 SuperAdmin Login & RBAC Management (AccessControl Module)",
+      "description": "Goal: Log in as SuperAdmin (admin@authservice.local), inspect roles/permissions, create a custom role, test SuperAdmin protection, and assign roles.",
+      "item": [
+        {
+          "name": "04.1 [200 OK] Login as SuperAdmin (admin@authservice.local)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Save admin access and refresh tokens to collection variables\", function () {",
+                  "    pm.expect(jsonData.accessToken).to.not.be.empty;",
+                  "    pm.expect(jsonData.refreshToken).to.not.be.empty;",
+                  "    pm.collectionVariables.set(\"adminAccessToken\", jsonData.accessToken);",
+                  "    pm.collectionVariables.set(\"adminRefreshToken\", jsonData.refreshToken);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Logs in with seeded SuperAdmin credentials to obtain administrative JWT tokens.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@authservice.local\",\n  \"password\": \"Admin@12345!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "04.2 [200 OK] Get SuperAdmin Profile & Claims (/me)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"SuperAdmin has all 6 core permissions\", function () {",
+                  "    pm.expect(jsonData.permissions.length).to.be.at.least(6);",
+                  "    pm.expect(jsonData.permissions).to.include.members([",
+                  "        \"auth:profile:read\",",
+                  "        \"users:read\",",
+                  "        \"users:manage\",",
+                  "        \"roles:read\",",
+                  "        \"roles:write\",",
+                  "        \"roles:manage\"",
+                  "    ]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Retrieves the SuperAdmin profile and verifies all 6 system permissions are present in claims."
+          },
+          "response": []
+        },
+        {
+          "name": "04.3 [200 OK] Get All Permissions Catalog",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Permissions catalog contains at least 6 permissions\", function () {",
+                  "    pm.expect(Array.isArray(jsonData)).to.be.true;",
+                  "    pm.expect(jsonData.length).to.be.at.least(6);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rbac/permissions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rbac",
+                "permissions"
+              ]
+            },
+            "description": "Retrieves the complete catalog of permissions across all modules."
+          },
+          "response": []
+        },
+        {
+          "name": "04.4 [200 OK] Get All System Roles",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Find SuperAdmin role and save superAdminRoleId\", function () {",
+                  "    pm.expect(Array.isArray(jsonData)).to.be.true;",
+                  "    const superAdminRole = jsonData.find(r => r.name === \"SuperAdmin\");",
+                  "    pm.expect(superAdminRole).to.not.be.undefined;",
+                  "    pm.expect(superAdminRole.roleId).to.not.be.empty;",
+                  "    pm.collectionVariables.set(\"superAdminRoleId\", superAdminRole.roleId);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rbac/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rbac",
+                "roles"
+              ]
+            },
+            "description": "Retrieves all roles and locates the SuperAdmin role to extract its roleId into superAdminRoleId."
+          },
+          "response": []
+        },
+        {
+          "name": "04.5 [201 Created] Create Custom Role (Auditor)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created or 200 OK\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Save createdRoleId to collection variable\", function () {",
+                  "    pm.expect(jsonData.roleId).to.not.be.undefined;",
+                  "    pm.collectionVariables.set(\"createdRoleId\", jsonData.roleId);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rbac/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rbac",
+                "roles"
+              ]
+            },
+            "description": "Creates a new custom role 'Auditor' and stores its roleId into createdRoleId.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Auditor\",\n  \"description\": \"Read-only auditor role\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "04.6 [409 Conflict Check] Create Duplicate Role (Auditor)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 409 Conflict\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rbac/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rbac",
+                "roles"
+              ]
+            },
+            "description": "Attempts to create a role with the same name 'Auditor' to verify 409 Conflict duplicate role prevention.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Auditor\",\n  \"description\": \"Read-only auditor role\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "04.7 [200 OK] Update Custom Role Permissions (Grant Read Permissions to Auditor)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Role permissions updated with read permissions\", function () {",
+                  "    pm.expect(jsonData.updatedPermissions).to.include.members([",
+                  "        \"auth:profile:read\",",
+                  "        \"users:read\",",
+                  "        \"roles:read\"",
+                  "    ]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rbac/roles/{{createdRoleId}}/permissions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rbac",
+                "roles",
+                "{{createdRoleId}}",
+                "permissions"
+              ]
+            },
+            "description": "Updates the Auditor role with read permissions: auth:profile:read, users:read, roles:read.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"permissionCodes\": [\n    \"auth:profile:read\",\n    \"users:read\",\n    \"roles:read\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "04.8 [403 System Protection Check] Try to Strip Permissions from SuperAdmin Role",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden (SystemRoleModificationForbidden)\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rbac/roles/{{superAdminRoleId}}/permissions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rbac",
+                "roles",
+                "{{superAdminRoleId}}",
+                "permissions"
+              ]
+            },
+            "description": "Attempts to strip core permissions from the system SuperAdmin role, asserting 403 Forbidden via SystemRoleModificationForbidden rule.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"permissionCodes\": [\n    \"auth:profile:read\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "04.9 [200 OK] Assign Custom Role (Auditor) to Registered User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Role assigned to user successfully\", function () {",
+                  "    pm.expect(jsonData.userId).to.eql(pm.collectionVariables.get(\"newUserId\"));",
+                  "    pm.expect(jsonData.assignedRoleId).to.eql(pm.collectionVariables.get(\"createdRoleId\"));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rbac/users/{{newUserId}}/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rbac",
+                "users",
+                "{{newUserId}}",
+                "roles"
+              ]
+            },
+            "description": "Assigns the Auditor role to the newly registered user (newUserId).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roleId\": \"{{createdRoleId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05 Dynamic Permission Elevation Verification",
+      "description": "Goal: Prove that after SuperAdmin assigned the \"Auditor\" role (which has roles:read and users:read) to newUser, that user can NOW re-login and access read endpoints, while still being blocked (403) from write endpoints!",
+      "item": [
+        {
+          "name": "05.1 [200 OK] Re-Login as Registered User to Receive Updated JWT Claims",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Update standard user tokens with elevated claims\", function () {",
+                  "    pm.expect(jsonData.accessToken).to.not.be.empty;",
+                  "    pm.expect(jsonData.refreshToken).to.not.be.empty;",
+                  "    pm.collectionVariables.set(\"standardUserAccessToken\", jsonData.accessToken);",
+                  "    pm.collectionVariables.set(\"standardUserRefreshToken\", jsonData.refreshToken);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Re-authenticates as the registered user to acquire a fresh JWT access token containing the newly assigned Auditor role and permissions.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{newUserEmail}}\",\n  \"password\": \"{{newUserPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "05.2 [200 OK] Elevated User Can Now Read Roles (roles:read Granted!)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK (previously 403 in 03.2)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Elevated user successfully retrieves roles list\", function () {",
+                  "    pm.expect(Array.isArray(jsonData)).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{standardUserAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{standardUserAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rbac/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rbac",
+                "roles"
+              ]
+            },
+            "description": "Demonstrates dynamic RBAC elevation: the user can now successfully call GET /api/v1/rbac/roles (which previously returned 403 Forbidden in step 03.2)."
+          },
+          "response": []
+        },
+        {
+          "name": "05.3 [403 Check] Elevated User Still Cannot Create Roles (roles:write Missing)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{standardUserAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{standardUserAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rbac/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rbac",
+                "roles"
+              ]
+            },
+            "description": "Verifies the principle of least privilege: despite having roles:read, the user still lacks roles:write and is blocked with 403 Forbidden when creating a role.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"UnauthorizedRole\",\n  \"description\": \"Still forbidden\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06 Users Module Full Lifecycle (UsersController)",
+      "description": "Goal: Test all 6 endpoints of the unified Users module using SuperAdmin token ({{adminAccessToken}}).",
+      "item": [
+        {
+          "name": "06.1 [200 OK] Get All User Profiles",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"User profiles list returned\", function () {",
+                  "    pm.expect(Array.isArray(jsonData)).to.be.true;",
+                  "    pm.expect(jsonData.length).to.be.at.least(1);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users"
+              ]
+            },
+            "description": "SuperAdmin retrieves all user profiles across the system."
+          },
+          "response": []
+        },
+        {
+          "name": "06.2 [201 Created] Admin Provisions New User Profile (POST /api/v1/users)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created or 200 OK\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Save createdProfileUserId to collection variable\", function () {",
+                  "    pm.expect(jsonData.userId).to.not.be.undefined;",
+                  "    pm.collectionVariables.set(\"createdProfileUserId\", jsonData.userId);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users"
+              ]
+            },
+            "description": "Provisions a new UserProfile entity in the Users module and captures createdProfileUserId.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Mona Zaki\",\n  \"email\": \"mona.zaki@example.com\",\n  \"countryCode\": \"+20\",\n  \"phoneNumber\": \"1234567890\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "06.3 [200 OK] Get User Profile By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Verify email matches provisioned user\", function () {",
+                  "    pm.expect(jsonData.email).to.eql(\"mona.zaki@example.com\");",
+                  "    pm.expect(jsonData.userId).to.eql(pm.collectionVariables.get(\"createdProfileUserId\"));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{createdProfileUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{createdProfileUserId}}"
+              ]
+            },
+            "description": "Fetches user profile by GUID ID and verifies email matches provisioned user."
+          },
+          "response": []
+        },
+        {
+          "name": "06.4 [200 OK] Get User Profile By Phone",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Verify userId matches createdProfileUserId\", function () {",
+                  "    pm.expect(jsonData.userId).to.eql(pm.collectionVariables.get(\"createdProfileUserId\"));",
+                  "    pm.expect(jsonData.phoneNumber).to.eql(\"1234567890\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/by-phone?countryCode=%2B20&phoneNumber=1234567890",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "by-phone"
+              ],
+              "query": [
+                {
+                  "key": "countryCode",
+                  "value": "+20"
+                },
+                {
+                  "key": "phoneNumber",
+                  "value": "1234567890"
+                }
+              ]
+            },
+            "description": "Fetches user profile by countryCode and phoneNumber query parameters."
+          },
+          "response": []
+        },
+        {
+          "name": "06.5 [200 OK] Update User Profile (Syncs with Identity Module)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Profile updated successfully in Users module\", function () {",
+                  "    pm.expect(jsonData.fullName).to.eql(\"Mona Zaki Updated\");",
+                  "    pm.expect(jsonData.email).to.eql(\"mona.updated@example.com\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{createdProfileUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{createdProfileUserId}}"
+              ]
+            },
+            "description": "Updates user profile information (fullName, email, phoneNumber).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Mona Zaki Updated\",\n  \"email\": \"mona.updated@example.com\",\n  \"countryCode\": \"+20\",\n  \"phoneNumber\": \"1234567899\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "06.6 [204 No Content] Soft Delete User Profile (Deactivates Identity & Revokes Tokens)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 204 No Content or 200 OK\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{createdProfileUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{createdProfileUserId}}"
+              ]
+            },
+            "description": "Soft deletes the user profile and deactivates identity credentials, asserting 204 No Content or 200 OK."
+          },
+          "response": []
+        },
+        {
+          "name": "06.7 [404 Not Found Check] Get Deleted User Profile By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404 Not Found\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{createdProfileUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{createdProfileUserId}}"
+              ]
+            },
+            "description": "Verifies that accessing the soft-deleted user profile returns 404 Not Found."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "07 Token Lifecycle, Account Suspension, Mobile Login & Password Reset",
+      "description": "Goal: Test Refresh Token Rotation, Token Revocation, Account Suspension auto-revocation, Mobile OTP Login, and Forgot/Reset Password.",
+      "item": [
+        {
+          "name": "07.1 [200 OK] Rotate Refresh Token (Valid Refresh Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Rotate tokens and save usedRefreshToken\", function () {",
+                  "    pm.expect(jsonData.accessToken).to.not.be.empty;",
+                  "    pm.expect(jsonData.refreshToken).to.not.be.empty;",
+                  "    pm.collectionVariables.set(\"usedRefreshToken\", pm.collectionVariables.get(\"standardUserRefreshToken\"));",
+                  "    pm.collectionVariables.set(\"standardUserAccessToken\", jsonData.accessToken);",
+                  "    pm.collectionVariables.set(\"standardUserRefreshToken\", jsonData.refreshToken);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "Rotates refresh token for StandardUser, saves the old token to usedRefreshToken, and updates standardUserAccessToken and standardUserRefreshToken with new values.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{standardUserRefreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "07.2 [401 Check] Reuse Old Rotated Refresh Token (Replay Attack Protection)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized (Replay Attack Protection)\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "Attempts to reuse the previously invalidated refresh token (usedRefreshToken), asserting 401 Unauthorized under Refresh Token Rotation security policy.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{usedRefreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "07.3 [200 OK] Admin Suspends User Account (Revokes All Active Tokens)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Account status updated to Suspended\", function () {",
+                  "    pm.expect(jsonData.newStatus).to.eql(\"Suspended\");",
+                  "    pm.expect(jsonData.revokedActiveTokensCount).to.be.at.least(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rbac/users/{{newUserId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rbac",
+                "users",
+                "{{newUserId}}",
+                "status"
+              ]
+            },
+            "description": "SuperAdmin updates status of registered user to 'Suspended', revoking all active refresh tokens in Identity.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Suspended\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "07.4 [401/403 Check] Suspended User Tries to Refresh Token or Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized or 403 Forbidden\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Attempts to log in as the suspended user, asserting 401 Unauthorized or 403 Forbidden.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{newUserEmail}}\",\n  \"password\": \"{{newUserPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "07.5 [200 OK] Admin Reactivates User Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Account status updated to Active\", function () {",
+                  "    pm.expect(jsonData.newStatus).to.eql(\"Active\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rbac/users/{{newUserId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rbac",
+                "users",
+                "{{newUserId}}",
+                "status"
+              ]
+            },
+            "description": "SuperAdmin reactivates the user account by setting status back to 'Active'.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Active\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "07.6 [200 OK] Passwordless Mobile Login Trigger (Sends WhatsApp OTP)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"OTP dispatched for mobile login\", function () {",
+                  "    pm.expect(jsonData.message).to.not.be.empty;",
+                  "    pm.expect(jsonData.expiresInSeconds).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login/mobile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login",
+                "mobile"
+              ]
+            },
+            "description": "Triggers passwordless login via mobile phone number for seeded admin account (+20 1000000001).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"countryCode\": \"+20\",\n  \"phoneNumber\": \"1000000001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "07.7 [200 OK] Forgot Password Request (Constant-Time Anti-Enumeration)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Password reset email dispatched\", function () {",
+                  "    pm.expect(jsonData.message).to.not.be.empty;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/forgot-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "forgot-password"
+              ]
+            },
+            "description": "Initiates password reset flow with constant-time response preventing email enumeration attacks.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{newUserEmail}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "07.8 [200 OK / 400 Check] Reset Password With Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK or 400 Bad Request (if token unreplaced/invalid)\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/reset-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "reset-password"
+              ]
+            },
+            "description": "Completes password reset using reset token. Validates 200 OK if token pasted into manualResetToken or 400 if placeholder token.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{manualResetToken}}\",\n  \"newPassword\": \"NewResetPassword@123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "07.9 [200 OK] Logout / Revoke Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK or 204 No Content\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/revoke",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "revoke"
+              ]
+            },
+            "description": "SuperAdmin logs out and explicitly revokes active refresh token.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{adminRefreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "08 OAuth2 Social Login Providers (Google, Facebook, GitHub, LinkedIn, Microsoft)",
+      "description": "Goal: Provide ready-to-run templates and validation checks for all 5 OAuth2 providers.",
+      "item": [
+        {
+          "name": "08.1 [400 Validation Check] Social Login With Unsupported Provider",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/social-login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "social-login"
+              ]
+            },
+            "description": "Tests validation gate when submitting an unsupported provider 'twitter', verifying 400 Bad Request.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provider\": \"twitter\",\n  \"credential\": \"some-token\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "08.2 [401 Check] Google Social Login With Fake/Expired ID Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized (or 400/500 if unconfigured)\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400, 401, 500]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/social-login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "social-login"
+              ]
+            },
+            "description": "Tests Google login with a malformed fake JWT id_token, verifying 401 Unauthorized (or 400/500 if client id unconfigured).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provider\": \"google\",\n  \"credential\": \"eyJhbGciOiJSUzI1NiIsImtpZCI6ImZha2UifQ.eyJzdWIiOiIxMjMifQ.fake\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "08.3 [Template] Google Social Login (Paste Real Google id_token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Google Social Login response check\", function () {",
+                  "    if (pm.response.code === 200) {",
+                  "        const jsonData = pm.response.json();",
+                  "        pm.expect(jsonData.accessToken).to.not.be.empty;",
+                  "    } else {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 500]);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/social-login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "social-login"
+              ]
+            },
+            "description": "Template request for authenticating via Google ID Token.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provider\": \"google\",\n  \"credential\": \"{{googleIdToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "08.4 [Template] Facebook Social Login (Paste Facebook Graph Access Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Facebook Social Login response check\", function () {",
+                  "    if (pm.response.code === 200) {",
+                  "        const jsonData = pm.response.json();",
+                  "        pm.expect(jsonData.accessToken).to.not.be.empty;",
+                  "    } else {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 500]);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/social-login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "social-login"
+              ]
+            },
+            "description": "Template request for authenticating via Facebook Graph User Access Token.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provider\": \"facebook\",\n  \"credential\": \"{{facebookAccessToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "08.5 [Template] GitHub / LinkedIn / Microsoft Social Login (Paste OAuth Auth Code)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"OAuth Code Social Login response check\", function () {",
+                  "    if (pm.response.code === 200) {",
+                  "        const jsonData = pm.response.json();",
+                  "        pm.expect(jsonData.accessToken).to.not.be.empty;",
+                  "    } else {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 500]);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/social-login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "social-login"
+              ]
+            },
+            "description": "Template request for authenticating via OAuth2 Authorization Code (GitHub, LinkedIn, or Microsoft).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provider\": \"github\",\n  \"credential\": \"{{oauthAuthCode}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

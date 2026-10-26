@@ -39,7 +39,9 @@ public sealed class SocialLoginCommandHandler : ICommandHandler<SocialLoginComma
         CancellationToken cancellationToken)
     {
         var provider = _socialProviders.FirstOrDefault(p =>
-            string.Equals(p.ProviderName, request.Provider.Trim(), StringComparison.OrdinalIgnoreCase));
+            string.Equals(p.ProviderName, request.Provider.Trim(), StringComparison.OrdinalIgnoreCase) ||
+            (string.Equals(p.ProviderName, "X", StringComparison.OrdinalIgnoreCase) &&
+             string.Equals(request.Provider.Trim(), "twitter", StringComparison.OrdinalIgnoreCase)));
 
         if (provider is null)
         {

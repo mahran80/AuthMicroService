@@ -48,12 +48,14 @@ public static class DependencyInjection
         services.AddHttpClient<GitHubAuthAdapter>();
         services.AddHttpClient<LinkedInAuthAdapter>();
         services.AddHttpClient<MicrosoftAuthAdapter>();
+        services.AddHttpClient<XAuthAdapter>();
 
         services.AddScoped<ISocialAuthProviderPort, GoogleAuthAdapter>();
         services.AddScoped<ISocialAuthProviderPort>(sp => sp.GetRequiredService<FacebookAuthAdapter>());
         services.AddScoped<ISocialAuthProviderPort>(sp => sp.GetRequiredService<GitHubAuthAdapter>());
         services.AddScoped<ISocialAuthProviderPort>(sp => sp.GetRequiredService<LinkedInAuthAdapter>());
         services.AddScoped<ISocialAuthProviderPort>(sp => sp.GetRequiredService<MicrosoftAuthAdapter>());
+        services.AddScoped<ISocialAuthProviderPort>(sp => sp.GetRequiredService<XAuthAdapter>());
 
         return services;
     }

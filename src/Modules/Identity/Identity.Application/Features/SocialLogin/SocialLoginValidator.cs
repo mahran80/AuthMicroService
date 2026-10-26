@@ -10,7 +10,9 @@ public sealed class SocialLoginValidator : AbstractValidator<SocialLoginCommand>
         "facebook",
         "github",
         "linkedin",
-        "microsoft"
+        "microsoft",
+        "x",
+        "twitter"
     };
 
     public SocialLoginValidator()
@@ -18,7 +20,7 @@ public sealed class SocialLoginValidator : AbstractValidator<SocialLoginCommand>
         RuleFor(x => x.Provider)
             .NotEmpty().WithMessage("Provider is required.")
             .Must(provider => AllowedProviders.Contains(provider.Trim()))
-            .WithMessage("Provider must be one of: google, facebook, github, linkedin, microsoft.");
+            .WithMessage("Provider must be one of: google, facebook, github, linkedin, microsoft, x, twitter.");
 
         RuleFor(x => x.Credential)
             .NotEmpty().WithMessage("Credential or authorization code is required.");

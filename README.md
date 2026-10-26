@@ -212,7 +212,7 @@ The service seeds two pre-configured, verified accounts out of the box:
 | `POST` | `/api/v1/auth/login/mobile` | Request 6-digit WhatsApp OTP login code | `AuthLogin` (5/min) | Anonymous |
 | `POST` | `/api/v1/auth/verify-otp` | Verify OTP code hash and authenticate session | `AuthSensitive` (5/5min) | Anonymous |
 | `POST` | `/api/v1/auth/resend-otp` | Regenerate and re-send active OTP code | `AuthEmail` (3/min) | Anonymous |
-| `POST` | `/api/v1/auth/social-login` | OAuth2 social login (`google`, `facebook`, `github`, `linkedin`, `microsoft`) | `AuthLogin` (5/min) | Anonymous |
+| `POST` | `/api/v1/auth/social-login` | OAuth2 social login (`google`, `facebook`, `github`, `linkedin`, `microsoft`, `x`) | `AuthLogin` (5/min) | Anonymous |
 | `POST` | `/api/v1/auth/forgot-password` | Request password reset email (enumeration-safe) | `AuthEmail` (3/min) | Anonymous |
 | `POST` | `/api/v1/auth/reset-password` | Reset password using cryptographically secure token | `AuthSensitive` (5/5min) | Anonymous |
 | `POST` | `/api/v1/auth/refresh` | Refresh JWT tokens (reads from JSON body or `refreshToken` cookie) | Standard | Anonymous |

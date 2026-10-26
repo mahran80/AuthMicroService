@@ -9,6 +9,7 @@ public sealed class SocialAuthOptions
     public GitHubOptions GitHub { get; set; } = new();
     public LinkedInOptions LinkedIn { get; set; } = new();
     public MicrosoftOptions Microsoft { get; set; } = new();
+    public XOptions X { get; set; } = new();
 }
 
 public sealed class GoogleOptions
@@ -42,4 +43,11 @@ public sealed class MicrosoftOptions
     public string ClientSecret { get; set; } = string.Empty;
     public string RedirectUri { get; set; } = string.Empty;
     public string TenantId { get; set; } = "common";
+}
+
+public sealed class XOptions
+{
+    public string ClientId { get; set; } = string.Empty;
+    public string ClientSecret { get; set; } = string.Empty;
+    public string RedirectUri { get; set; } = string.Empty;
 }
