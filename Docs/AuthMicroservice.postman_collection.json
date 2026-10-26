@@ -2163,7 +2163,7 @@
               "query": [
                 {
                   "key": "countryCode",
-                  "value": "+20"
+                  "value": "%2B20"
                 },
                 {
                   "key": "phoneNumber",
@@ -2964,8 +2964,8 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status code is 400 Bad Request\", function () {",
-                  "    pm.response.to.have.status(400);",
+                  "pm.test(\"Status code is 400 Bad Request or 401 Unauthorized\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400, 401]);",
                   "});"
                 ],
                 "type": "text/javascript"

@@ -77,12 +77,12 @@ builder.Services.AddAuthentication(options =>
         NameClaimType = "name"
     };
 
-    // Dual token extraction: Header Bearer token OR HttpOnly accessToken cookie
+    // Dual token extraction: Header Bearer token takes precedence, fallback to HttpOnly accessToken cookie
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
         {
-            if (string.IsNullOrEmpty(context.Token) &&
+            if (string.IsNullOrEmpty(context.Request.Headers.Authorization) &&
                 context.Request.Cookies.TryGetValue("accessToken", out var cookieToken))
             {
                 context.Token = cookieToken;
