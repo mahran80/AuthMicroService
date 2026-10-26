@@ -35,6 +35,16 @@ public sealed class XAuthAdapter : ISocialAuthProviderPort
             return Result.Failure<ExternalUserInfo>(IdentityErrors.InvalidSocialCredential(ProviderName));
         }
 
+        string clientId = !string.IsNullOrWhiteSpace(_options.X.ClientId)
+            ? _options.X.ClientId
+            : _options.Twitter.ClientId;
+
+        if (string.IsNullOrWhiteSpace(clientId))
+        {
+            _logger.LogWarning("X OAuth ClientId is not configured.");
+            return Result.Failure<ExternalUserInfo>(IdentityErrors.SocialProviderNotConfigured(ProviderName));
+        }
+
         try
         {
             using var request = new HttpRequestMessage(

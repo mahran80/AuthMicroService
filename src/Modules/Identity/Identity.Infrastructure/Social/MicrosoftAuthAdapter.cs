@@ -36,11 +36,13 @@ public sealed class MicrosoftAuthAdapter : ISocialAuthProviderPort
         }
 
         var msConfig = _options.Microsoft;
-        if (string.IsNullOrWhiteSpace(msConfig.ClientId) ||
-            string.IsNullOrWhiteSpace(msConfig.ClientSecret) ||
-            string.IsNullOrWhiteSpace(msConfig.RedirectUri))
+        string trimmedCredential = credential.Trim();
+        bool isDirectAccessToken = trimmedCredential.StartsWith("ey", StringComparison.Ordinal) ||
+                                   trimmedCredential.StartsWith("Ew", StringComparison.Ordinal);
+
+        if (string.IsNullOrWhiteSpace(msConfig.ClientId))
         {
-            _logger.LogWarning("Microsoft OAuth configuration is incomplete.");
+            _logger.LogWarning("Microsoft OAuth configuration is incomplete: ClientId is missing.");
             return Result.Failure<ExternalUserInfo>(IdentityErrors.SocialProviderNotConfigured(ProviderName));
         }
 
@@ -48,7 +50,19 @@ public sealed class MicrosoftAuthAdapter : ISocialAuthProviderPort
 
         try
         {
-            string? accessToken = await ExchangeCodeForTokenAsync(credential, msConfig, tenant, ct);
+            string? accessToken = null;
+
+            if (!string.IsNullOrWhiteSpace(msConfig.ClientSecret) &&
+                !string.IsNullOrWhiteSpace(msConfig.RedirectUri) &&
+                !isDirectAccessToken)
+            {
+                accessToken = await ExchangeCodeForTokenAsync(trimmedCredential, msConfig, tenant, ct);
+            }
+            else
+            {
+                accessToken = trimmedCredential;
+            }
+
             if (string.IsNullOrWhiteSpace(accessToken))
             {
                 return Result.Failure<ExternalUserInfo>(IdentityErrors.InvalidSocialCredential(ProviderName));

@@ -41,18 +41,26 @@ public sealed class GitHubAuthAdapter : ISocialAuthProviderPort
                                    trimmedCredential.StartsWith("ghp_", StringComparison.OrdinalIgnoreCase) ||
                                    trimmedCredential.StartsWith("github_pat_", StringComparison.OrdinalIgnoreCase);
 
-        if (!isDirectAccessToken && (string.IsNullOrWhiteSpace(githubOptions.ClientId) ||
-            string.IsNullOrWhiteSpace(githubOptions.ClientSecret)))
+        if (string.IsNullOrWhiteSpace(githubOptions.ClientId))
         {
-            _logger.LogWarning("GitHub OAuth ClientId or ClientSecret is not configured.");
+            _logger.LogWarning("GitHub OAuth ClientId is not configured.");
             return Result.Failure<ExternalUserInfo>(IdentityErrors.SocialProviderNotConfigured(ProviderName));
         }
 
         try
         {
-            string? accessToken = isDirectAccessToken
-                ? trimmedCredential
-                : await ExchangeCodeForTokenAsync(trimmedCredential, githubOptions, ct);
+            string? accessToken = null;
+
+            if (!string.IsNullOrWhiteSpace(githubOptions.ClientSecret) &&
+                !isDirectAccessToken &&
+                trimmedCredential.Length <= 40)
+            {
+                accessToken = await ExchangeCodeForTokenAsync(trimmedCredential, githubOptions, ct);
+            }
+            else
+            {
+                accessToken = trimmedCredential;
+            }
 
             if (string.IsNullOrWhiteSpace(accessToken))
             {

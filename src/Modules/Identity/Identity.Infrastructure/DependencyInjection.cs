@@ -48,6 +48,7 @@ public static class DependencyInjection
         services.AddHttpClient<GitHubAuthAdapter>();
         services.AddHttpClient<LinkedInAuthAdapter>();
         services.AddHttpClient<MicrosoftAuthAdapter>();
+        services.AddHttpClient<TwitterAuthAdapter>();
         services.AddHttpClient<XAuthAdapter>();
 
         services.AddScoped<ISocialAuthProviderPort, GoogleAuthAdapter>();
@@ -55,6 +56,7 @@ public static class DependencyInjection
         services.AddScoped<ISocialAuthProviderPort>(sp => sp.GetRequiredService<GitHubAuthAdapter>());
         services.AddScoped<ISocialAuthProviderPort>(sp => sp.GetRequiredService<LinkedInAuthAdapter>());
         services.AddScoped<ISocialAuthProviderPort>(sp => sp.GetRequiredService<MicrosoftAuthAdapter>());
+        services.AddScoped<ISocialAuthProviderPort>(sp => sp.GetRequiredService<TwitterAuthAdapter>());
         services.AddScoped<ISocialAuthProviderPort>(sp => sp.GetRequiredService<XAuthAdapter>());
 
         return services;

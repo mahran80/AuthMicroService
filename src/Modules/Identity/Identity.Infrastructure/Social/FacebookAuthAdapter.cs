@@ -35,6 +35,12 @@ public sealed class FacebookAuthAdapter : ISocialAuthProviderPort
             return Result.Failure<ExternalUserInfo>(IdentityErrors.InvalidSocialCredential(ProviderName));
         }
 
+        if (string.IsNullOrWhiteSpace(_options.Facebook.AppId))
+        {
+            _logger.LogWarning("Facebook AppId is not configured.");
+            return Result.Failure<ExternalUserInfo>(IdentityErrors.SocialProviderNotConfigured(ProviderName));
+        }
+
         try
         {
             // If AppId and AppSecret are configured, optionally verify debug_token

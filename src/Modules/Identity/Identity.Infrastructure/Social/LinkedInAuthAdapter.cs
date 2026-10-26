@@ -37,9 +37,13 @@ public sealed class LinkedInAuthAdapter : ISocialAuthProviderPort
         }
 
         var linkedInConfig = _options.LinkedIn;
-        if (string.IsNullOrWhiteSpace(linkedInConfig.ClientId) ||
+        string trimmedCredential = credential.Trim();
+        bool isDirectAccessToken = trimmedCredential.StartsWith("AQ", StringComparison.Ordinal) ||
+                                   (trimmedCredential.Length > 100 && !trimmedCredential.Contains(' '));
+
+        if (!isDirectAccessToken && (string.IsNullOrWhiteSpace(linkedInConfig.ClientId) ||
             string.IsNullOrWhiteSpace(linkedInConfig.ClientSecret) ||
-            string.IsNullOrWhiteSpace(linkedInConfig.RedirectUri))
+            string.IsNullOrWhiteSpace(linkedInConfig.RedirectUri)))
         {
             _logger.LogWarning("LinkedIn OAuth configuration is incomplete.");
             return Result.Failure<ExternalUserInfo>(IdentityErrors.SocialProviderNotConfigured(ProviderName));
@@ -47,7 +51,10 @@ public sealed class LinkedInAuthAdapter : ISocialAuthProviderPort
 
         try
         {
-            string? accessToken = await ExchangeCodeForTokenAsync(credential, linkedInConfig, ct);
+            string? accessToken = isDirectAccessToken
+                ? trimmedCredential
+                : await ExchangeCodeForTokenAsync(trimmedCredential, linkedInConfig, ct);
+
             if (string.IsNullOrWhiteSpace(accessToken))
             {
                 return Result.Failure<ExternalUserInfo>(IdentityErrors.InvalidSocialCredential(ProviderName));

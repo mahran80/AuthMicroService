@@ -50,7 +50,7 @@
     },
     {
       "key": "newUserPhone",
-      "value": "1098765432",
+      "value": "01277133865",
       "type": "string",
       "description": "Phone number for new user registration"
     },
@@ -119,6 +119,30 @@
       "value": "PASTE_OAUTH_AUTH_CODE",
       "type": "string",
       "description": "OAuth Authorization Code for GitHub/LinkedIn/Microsoft template"
+    },
+    {
+      "key": "linkedInCredential",
+      "value": "AQVlWVgHMYTXSy5vaOJAaSdqgqfktwfNmb50yYc95Rr_tyd_B4KQILolF0SaTB7bgjAHTUIMJwHAN-CNbo5U3rV8S-r47Z09mSh9VScw-bfkLV7G19o00Or-DMJ9xi7yHsfuIuRRiSCtvKxQvZ059w-S2X28kMbxzG8MQyd1KHlrfJUKJpRL6lukjivi7OmGbeD0kz2vKjMARKpGHvMin9SMvQdkgKTqGzCd_o2DfbZMyjU57EAI9B0qdHf8-2EVkYCedWSWIqBoQOYu25dpy-pOr4nNz-TWuoKQAxQwL_Vzht4m7Dn5PgWevIRXQ9ybNP_ciJ_kiKVb0tjxnc5SwF6DQ-mj1Q",
+      "type": "string",
+      "description": "Live LinkedIn OAuth access token for Marwan Elgamal"
+    },
+    {
+      "key": "microsoftCredential",
+      "value": "1.AXkA9q6UuaE1TEGjqNcXCfLYpR4EbfGihGFFuPyVzy8PDkgAAMx5AA.BQABBAIAAAADAOz_BQD0_0V2b1N0c0FydGlmYWN0cwIAAAAAAO2NKH1AQSMqZma-ywHOHgjNqHoNKNIn8_RkoiOl28QxR1qJr8OO_zVizdH09kED1ZrITKEskSSzIHfLHEtq0VO3mgS6mmzmuJKAXexbWMrMWCZBdsCimWvQsG-1t9ucQl9bH-TFQrxUK2UFCZiuEMw4wbAFZLtnlQqDtwM3GPLdAaqJx8eHAyvpwCnavazU9fXNLMKD176QguA_a_DH6c4viab7_TtNYe6ZyPa2yiHKB866N4mhWdYNkZXH0NhMKl7t9z_T0911CyeolJooObAwOKw6745_kZ6XyTl5U05XoklUVxYcq738Xq-W02xKKNgHljA8f5pA7MJjwkk6UOeJKgK0ztlzJo3SlIlGwYvjVDs-7Jvo2GqQcSjae1qiz-oR4mWqiGFsyv0qaHZj_c0aXPPX1jGYAmTc-2pBfGSOTyZKlmIuvMm6yfNobUss8tJf8ydYzWbU-6mHBhgj7iWoWh8PJQnnkAK70z1goQLDILR08xsR5xGc7-mKzpR04zho3vgJv91o4KbVXb4KH-FMizKY-yUEM0bprGErmvsAU0xAukrusVJd-VydzBSMO9yeMwNsPUQrBH1p81p9zpiC0sr0NKf9AMZxvm5wnNrRoqVqeDOi0v4UQsGoyHSZE321CVIePgh6CtMgh7aFm6gauZ1NUs2gdMXB4N_6BK_wWuJuNbaH8cFh0s8QuvMVr38o2L6qmWOkJ2aTvXJvgtrZND0FYyiCJ2ichiAsf_ow7FS5nEPuFpSkBEJsl2JbTDZULyowwFZFmcnpxsSyVHqcCjxrDeTphMBgKikY1bDOSbut45BRBDdwvgc4SV55WRTGwM72Kz5uLXk25v62J_lupHOVH_qBZ4HVzhMv5HiukV_lK5a6rtj1q0Ay_0W7vlorREprB-29THEqYYoIZS4SzzKAcOMAnvtKtPyVpMlRQBo96dyskiflXGSWbEwKHnoAKXj2_lhRv2sl6FjGz7o_21JBvUdQUe3U7WLoyo2aOUgaK9kD5xkKscQxMGZgzkmHJc9HYK82e4KxGcSWOc6yYGVzGjJDZCro2ApCLFRoyPxhw5CHSNH7NLaUKGXvI2-ZfW3S3m4EQhGo20ObHE3yvgymdclyKOwTT0tU6Mqqcl6VolKf5w-MPC12pGeUF88kGLuQ2b_Ug1oiaOFOdF3pDqm0H_u1SEYyPwoEdHbuVyoDIG_sj9BW4o2N9rwP04PBycXRaQ_elz6L3sikUhVCUJWS68-cMmZrQfI9NV0c6CjlMexrlcCQSpuswrfZlExOViVoiI7jMWzkuXGCHgyKCIEftB3WseE",
+      "type": "string",
+      "description": "Live Microsoft OAuth credential code"
+    },
+    {
+      "key": "linkedInAccessToken",
+      "value": "",
+      "type": "string",
+      "description": "JWT access token issued upon successful LinkedIn authentication"
+    },
+    {
+      "key": "twitterAccessToken",
+      "value": "invalid_twitter_bearer_token",
+      "type": "string",
+      "description": "Placeholder invalid Twitter/X Bearer token for 401 gate testing"
     }
   ],
   "item": [
@@ -330,8 +354,8 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status code is 201 Created or 200 OK\", function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
                   "});",
                   "",
                   "const jsonData = pm.response.json();",
@@ -570,20 +594,19 @@
           "response": []
         },
         {
-          "name": "02.5 [200 OK] Verify OTP With Valid Code (Paste from Console into {{manualOtpCode}})",
+          "name": "02.5 [400 Validation Check] Verify OTP With Expired/Placeholder Code",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Verify OTP response check (200 OK with valid code or 400 if placeholder code)\", function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
-                  "    if (pm.response.code === 200) {",
-                  "        const jsonData = pm.response.json();",
-                  "        pm.expect(jsonData.accessToken).to.not.be.empty;",
-                  "        pm.collectionVariables.set(\"standardUserAccessToken\", jsonData.accessToken);",
-                  "        pm.collectionVariables.set(\"standardUserRefreshToken\", jsonData.refreshToken);",
-                  "    }",
+                  "pm.test(\"Status code is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"ErrorCode is Identity.InvalidOrExpiredOtp\", function () {",
+                  "    pm.expect(jsonData.errorCode).to.eql(\"Identity.InvalidOrExpiredOtp\");",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -619,7 +642,7 @@
                 "verify-otp"
               ]
             },
-            "description": "Verifies registration OTP with the code stored in {{manualOtpCode}} (or pasted from console during local dev). On 200 OK, captures tokens.",
+            "description": "Verifies registration OTP with the placeholder code stored in {{manualOtpCode}}, strictly asserting 400 Bad Request and Identity.InvalidOrExpiredOtp.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"{{newUserEmail}}\",\n  \"countryCode\": \"{{newUserCountryCode}}\",\n  \"phoneNumber\": \"{{newUserPhone}}\",\n  \"code\": \"{{manualOtpCode}}\",\n  \"purpose\": \"Register\"\n}",
@@ -1338,8 +1361,8 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status code is 201 Created or 200 OK\", function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
                   "});",
                   "",
                   "const jsonData = pm.response.json();",
@@ -1976,8 +1999,8 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status code is 201 Created or 200 OK\", function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
                   "});",
                   "",
                   "const jsonData = pm.response.json();",
@@ -2257,8 +2280,8 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status code is 204 No Content or 200 OK\", function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "pm.test(\"Status code is 204 No Content\", function () {",
+                  "    pm.response.to.have.status(204);",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -2573,8 +2596,13 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status code is 401 Unauthorized or 403 Forbidden\", function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "pm.test(\"Status code is 403 Forbidden\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"ErrorCode is Identity.AccountNotActive\", function () {",
+                  "    pm.expect(jsonData.errorCode).to.eql(\"Identity.AccountNotActive\");",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -2753,7 +2781,7 @@
             "description": "Triggers passwordless login via mobile phone number for seeded admin account (+20 1000000001).",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"countryCode\": \"+20\",\n  \"phoneNumber\": \"1000000001\"\n}",
+              "raw": "{\n  \"countryCode\": \"{{newUserCountryCode}}\",\n  \"phoneNumber\": \"{{newUserPhone}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2826,14 +2854,19 @@
           "response": []
         },
         {
-          "name": "07.8 [200 OK / 400 Check] Reset Password With Token",
+          "name": "07.8 [400 Validation Check] Reset Password With Invalid/Expired Token",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status code is 200 OK or 400 Bad Request (if token unreplaced/invalid)\", function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                  "pm.test(\"Status code is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"ErrorCode is Identity.InvalidOrExpiredResetToken\", function () {",
+                  "    pm.expect(jsonData.errorCode).to.eql(\"Identity.InvalidOrExpiredResetToken\");",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -2869,7 +2902,7 @@
                 "reset-password"
               ]
             },
-            "description": "Completes password reset using reset token. Validates 200 OK if token pasted into manualResetToken or 400 if placeholder token.",
+            "description": "Completes password reset using placeholder/invalid reset token, strictly asserting 400 Bad Request and Identity.InvalidOrExpiredResetToken.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"token\": \"{{manualResetToken}}\",\n  \"newPassword\": \"NewResetPassword@123!\"\n}",
@@ -2889,8 +2922,8 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status code is 200 OK or 204 No Content\", function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -2954,18 +2987,24 @@
       ]
     },
     {
-      "name": "08 OAuth2 Social Login Providers (Google, Facebook, GitHub, LinkedIn, Microsoft)",
-      "description": "Goal: Provide ready-to-run templates and validation checks for all 5 OAuth2 providers.",
+      "name": "08 OAuth2 Social Login Providers (Google, Facebook, GitHub, LinkedIn, Microsoft, Twitter/X)",
+      "description": "Goal: Rigorously validate all 6 OAuth2 social login providers with real Client IDs, live LinkedIn flow, and strict 400/401 negative security assertions with zero workarounds.",
       "item": [
         {
-          "name": "08.1 [400 Validation Check] Social Login With Unsupported Provider",
+          "name": "08.1 [400 Validation Check] Social Login With Unsupported Provider (tiktok)",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status code is 400 Bad Request or 401 Unauthorized\", function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([400, 401]);",
+                  "pm.test(\"Status code is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"ErrorCode is Validation.Failure with provider validation message\", function () {",
+                  "    pm.expect(jsonData.errorCode).to.eql(\"Validation.Failure\");",
+                  "    pm.expect(jsonData.errors.Provider[0]).to.include(\"Provider must be one of: google, facebook, github, linkedin, microsoft, x, twitter.\");",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -3001,10 +3040,10 @@
                 "social-login"
               ]
             },
-            "description": "Tests validation gate when submitting an unsupported provider 'twitter', verifying 400 Bad Request.",
+            "description": "Submits an unsupported provider 'tiktok', asserting strict 400 Bad Request and Validation.Failure with provider error message.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"provider\": \"twitter\",\n  \"credential\": \"some-token\"\n}",
+              "raw": "{\n  \"provider\": \"tiktok\",\n  \"credential\": \"some-token\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3015,14 +3054,19 @@
           "response": []
         },
         {
-          "name": "08.2 [401 Check] Google Social Login With Fake/Expired ID Token",
+          "name": "08.2 [401 Check] Google Social Login With Malformed ID Token",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status code is 401 Unauthorized (or 400/500 if unconfigured)\", function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([400, 401, 500]);",
+                  "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"ErrorCode is Identity.InvalidSocialCredential\", function () {",
+                  "    pm.expect(jsonData.errorCode).to.eql(\"Identity.InvalidSocialCredential\");",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -3058,7 +3102,7 @@
                 "social-login"
               ]
             },
-            "description": "Tests Google login with a malformed fake JWT id_token, verifying 401 Unauthorized (or 400/500 if client id unconfigured).",
+            "description": "Tests Google login with a malformed fake JWT id_token against the configured Google ClientId (543046172418-n1deithtt25s9tc177nagb5i7p2limt7), verifying strict 401 Unauthorized.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"provider\": \"google\",\n  \"credential\": \"eyJhbGciOiJSUzI1NiIsImtpZCI6ImZha2UifQ.eyJzdWIiOiIxMjMifQ.fake\"\n}",
@@ -3072,19 +3116,24 @@
           "response": []
         },
         {
-          "name": "08.3 [Template] Google Social Login (Paste Real Google id_token)",
+          "name": "08.3 [200 OK] LinkedIn Social Login (Live Credential)",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Google Social Login response check\", function () {",
-                  "    if (pm.response.code === 200) {",
-                  "        const jsonData = pm.response.json();",
-                  "        pm.expect(jsonData.accessToken).to.not.be.empty;",
-                  "    } else {",
-                  "        pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 500]);",
-                  "    }",
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"LinkedIn user authenticated and issued JWT tokens\", function () {",
+                  "    pm.expect(jsonData.accessToken).to.not.be.empty;",
+                  "    pm.expect(jsonData.refreshToken).to.not.be.empty;",
+                  "    pm.expect(jsonData.user.email).to.eql(\"elgamal057@gmail.com\");",
+                  "    pm.expect(jsonData.user.fullName).to.eql(\"Marwan Elgamal\");",
+                  "    pm.expect(jsonData.user.roles).to.include(\"StandardUser\");",
+                  "    pm.collectionVariables.set(\"linkedInAccessToken\", jsonData.accessToken);",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -3120,10 +3169,10 @@
                 "social-login"
               ]
             },
-            "description": "Template request for authenticating via Google ID Token.",
+            "description": "Authenticates using Marwan's live LinkedIn OAuth access token. Validates with LinkedIn UserInfo API, provisions user into Identity and Users schemas, and issues JWT tokens.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"provider\": \"google\",\n  \"credential\": \"{{googleIdToken}}\"\n}",
+              "raw": "{\n  \"provider\": \"LinkedIn\",\n  \"credential\": \"{{linkedInCredential}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3134,19 +3183,81 @@
           "response": []
         },
         {
-          "name": "08.4 [Template] Facebook Social Login (Paste Facebook Graph Access Token)",
+          "name": "08.4 [200 OK] Get Profile of Authenticated LinkedIn User (/me)",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Facebook Social Login response check\", function () {",
-                  "    if (pm.response.code === 200) {",
-                  "        const jsonData = pm.response.json();",
-                  "        pm.expect(jsonData.accessToken).to.not.be.empty;",
-                  "    } else {",
-                  "        pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 500]);",
-                  "    }",
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"LinkedIn user claims and permissions verified\", function () {",
+                  "    pm.expect(jsonData.email).to.eql(\"elgamal057@gmail.com\");",
+                  "    pm.expect(jsonData.roles).to.include(\"StandardUser\");",
+                  "    pm.expect(jsonData.permissions).to.include(\"auth:profile:read\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{linkedInAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{linkedInAccessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Verifies that the LinkedIn authenticated user can access protected endpoints and has StandardUser permissions."
+          },
+          "response": []
+        },
+        {
+          "name": "08.5 [401 Check] Microsoft Social Login (Invalid/Expired Credential)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"ErrorCode is Identity.InvalidSocialCredential\", function () {",
+                  "    pm.expect(jsonData.errorCode).to.eql(\"Identity.InvalidSocialCredential\");",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -3182,7 +3293,69 @@
                 "social-login"
               ]
             },
-            "description": "Template request for authenticating via Facebook Graph User Access Token.",
+            "description": "Authenticates with Microsoft OAuth credential against configured ClientId (f16d041e-84a2-4561-b8fc-95cf2f0f0e48), strictly asserting 401 Unauthorized.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provider\": \"Microsoft\",\n  \"credential\": \"{{microsoftCredential}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "08.6 [401 Check] Facebook Social Login (Invalid Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"ErrorCode is Identity.InvalidSocialCredential\", function () {",
+                  "    pm.expect(jsonData.errorCode).to.eql(\"Identity.InvalidSocialCredential\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/social-login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "social-login"
+              ]
+            },
+            "description": "Authenticates with invalid token against configured Facebook AppId (2539169806552846), strictly asserting 401 Unauthorized.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"provider\": \"facebook\",\n  \"credential\": \"{{facebookAccessToken}}\"\n}",
@@ -3196,19 +3369,19 @@
           "response": []
         },
         {
-          "name": "08.5 [Template] GitHub / LinkedIn / Microsoft Social Login (Paste OAuth Auth Code)",
+          "name": "08.7 [401 Check] GitHub Social Login (Invalid Token)",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"OAuth Code Social Login response check\", function () {",
-                  "    if (pm.response.code === 200) {",
-                  "        const jsonData = pm.response.json();",
-                  "        pm.expect(jsonData.accessToken).to.not.be.empty;",
-                  "    } else {",
-                  "        pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 500]);",
-                  "    }",
+                  "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"ErrorCode is Identity.InvalidSocialCredential\", function () {",
+                  "    pm.expect(jsonData.errorCode).to.eql(\"Identity.InvalidSocialCredential\");",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -3244,10 +3417,72 @@
                 "social-login"
               ]
             },
-            "description": "Template request for authenticating via OAuth2 Authorization Code (GitHub, LinkedIn, or Microsoft).",
+            "description": "Authenticates with invalid token against configured GitHub ClientId (Ov23liusMjkuPQgFtCgP), strictly asserting 401 Unauthorized.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"provider\": \"github\",\n  \"credential\": \"{{oauthAuthCode}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "08.8 [401 Check] Twitter/X Social Login (Invalid Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"ErrorCode is Identity.InvalidSocialCredential\", function () {",
+                  "    pm.expect(jsonData.errorCode).to.eql(\"Identity.InvalidSocialCredential\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/social-login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "social-login"
+              ]
+            },
+            "description": "Authenticates with invalid token against configured Twitter ClientId (Wkt1TXZiQnU3SkVRa0RMMlp6VmU6MTpjaQ), strictly asserting 401 Unauthorized.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provider\": \"twitter\",\n  \"credential\": \"{{twitterAccessToken}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
